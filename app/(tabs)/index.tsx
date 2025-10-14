@@ -1,6 +1,8 @@
 import React from 'react';
 import { ScrollView, View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
 
 const establishments = [
@@ -20,9 +22,9 @@ const services = [
 ];
 
 const adBanners = [
-  { id: 1, text: '🎉 Novidades e Ofertas', color: '#F06292' },
-  { id: 2, text: '🔥 Promoções Especiais', color: '#E94057' },
-  { id: 3, text: '⭐ Pontos em Dobro', color: '#FF6B35' },
+  { id: 1, text: '🎉 Novidades e Ofertas', colors: ['#ff3366', '#ff5e5e'] },
+  { id: 2, text: '🔥 Promoções Especiais', colors: ['#ff3366', '#ff5e5e'] },
+  { id: 3, text: '⭐ Pontos em Dobro', colors: ['#ff3366', '#ff5e5e'] },
 ];
 
 const nearbyStores = [
@@ -34,19 +36,26 @@ const nearbyStores = [
   { id: 6, name: 'Habib\'s', image: '🥙' },
 ];
 
-function EstablishmentCard({ name }) {
+function EstablishmentCard({ name, image }) {
   return (
     <TouchableOpacity style={styles.establishmentCard}>
-      <View style={styles.establishmentLogo} />
+      <View style={styles.establishmentLogo}>
+        <Text style={styles.establishmentEmoji}>{image}</Text>
+      </View>
       <Text style={styles.establishmentName}>{name}</Text>
     </TouchableOpacity>
   );
 }
 
-function ServiceCard({ name, description }) {
+function ServiceCard({ name, description, icon }) {
   return (
     <TouchableOpacity style={styles.serviceCard}>
-      <View style={styles.serviceLogo} />
+      <LinearGradient
+        colors={['#ff3366', '#ff5e5e']}
+        style={styles.serviceLogo}
+      >
+        <Text style={styles.serviceIcon}>{icon}</Text>
+      </LinearGradient>
       <Text style={styles.serviceName}>{name}</Text>
       <Text style={styles.serviceDescription}>{description}</Text>
     </TouchableOpacity>
@@ -63,9 +72,15 @@ function AdBannerCarousel() {
       contentContainerStyle={styles.adCarouselContent}
     >
       {adBanners.map((banner) => (
-        <View key={banner.id} style={[styles.adBanner, { backgroundColor: banner.color }]}>
+        <LinearGradient
+          key={banner.id}
+          colors={banner.colors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.adBanner}
+        >
           <Text style={styles.adText}>{banner.text}</Text>
-        </View>
+        </LinearGradient>
       ))}
     </ScrollView>
   );
@@ -84,34 +99,48 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Logo */}
-        <View style={styles.logoContainer}>
-          <View style={styles.logo}>
-            <Text style={styles.logoText}>P</Text>
+        {/* Header com gradiente */}
+        <LinearGradient
+          colors={['#ff3366', '#ff5e5e']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
+          <View style={styles.headerContent}>
+            <View style={styles.logoContainer}>
+              <View style={styles.logo}>
+                <Text style={styles.logoText}>P</Text>
+              </View>
+              <Text style={styles.pontueiText}>Pontuei.</Text>
+            </View>
+            <TouchableOpacity style={styles.notificationButton}>
+              <Ionicons name="notifications" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeText}>Bem vindo de volta! 👋</Text>
+            <Text style={styles.userName}>Eric Bauer</Text>
+          </View>
+        </LinearGradient>
+
+        {/* Search Bar */}
+        <View style={styles.searchWrapper}>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color="#ff3366" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Pesquise por lojas, cafeterias e mais."
+              placeholderTextColor="#9D9D9D"
+            />
           </View>
         </View>
 
-        {/* Welcome Message */}
-        <View style={styles.welcomeContainer}>
-          <Text style={styles.welcomeText}>Bem vindo de volta, </Text>
-          <Text style={styles.userName}>Eric Bauer</Text>
-        </View>
-
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Pesquise por lojas, cafeterias e mais."
-            placeholderTextColor="#9D9D9D"
-          />
-        </View>
-
         {/* Last Visited Establishments */}
-        <Text style={styles.sectionTitle}>Últimos estabelecimentos visitados</Text>
+        <Text style={styles.sectionTitle}>🏪 Últimos estabelecimentos visitados</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.establishmentsScroll}>
           {establishments.map((item) => (
-            <EstablishmentCard key={item.id} name={item.name} />
+            <EstablishmentCard key={item.id} name={item.name} image={item.image} />
           ))}
         </ScrollView>
 
@@ -119,22 +148,23 @@ export default function HomeScreen() {
         <AdBannerCarousel />
 
         {/* Services Section */}
-        <Text style={styles.servicesTitle}>Serviços</Text>
+        <Text style={styles.servicesTitle}>🚀 Serviços</Text>
         <View style={styles.servicesGrid}>
           {services.map((service) => (
             <ServiceCard
               key={service.id}
               name={service.name}
               description={service.description}
+              icon={service.icon}
             />
           ))}
         </View>
 
         {/* Nearby Stores */}
-        <Text style={styles.sectionTitle}>Lojas próximas de você</Text>
+        <Text style={styles.sectionTitle}>📍 Lojas próximas de você</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.establishmentsScroll}>
           {nearbyStores.map((item) => (
-            <EstablishmentCard key={item.id} name={item.name} />
+            <EstablishmentCard key={item.id} name={item.name} image={item.image} />
           ))}
         </ScrollView>
       </ScrollView>
@@ -147,173 +177,215 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f9fa',
   },
   scrollContent: {
     paddingBottom: 20,
   },
-  logoContainer: {
+  header: {
+    paddingTop: 50,
+    paddingBottom: 30,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+    marginBottom: -15,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 20,
+    paddingHorizontal: 20,
     marginBottom: 20,
   },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   logo: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#E94057',
-    borderRadius: 25,
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 8,
   },
   logoText: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
   },
+  pontueiText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  notificationButton: {
+    padding: 8,
+  },
   welcomeContainer: {
-    alignItems: 'flex-start',
-    marginLeft: 48,
-    marginBottom: 35,
+    paddingHorizontal: 20,
   },
   welcomeText: {
-    fontSize: 11,
-    color: '#000',
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.9)',
     fontFamily: 'Poppins_400Regular',
+    marginBottom: 4,
   },
   userName: {
-    fontSize: 16,
-    color: '#E94057',
+    fontSize: 24,
+    color: '#fff',
     fontFamily: 'Poppins_600SemiBold',
+    fontWeight: 'bold',
+  },
+  searchWrapper: {
+    paddingHorizontal: 20,
+    marginTop: 25,
+    marginBottom: 30,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: 332,
-    height: 40,
-    backgroundColor: 'rgba(217, 217, 217, 0.37)',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    alignSelf: 'center',
-    marginBottom: 35,
-  },
-  searchIcon: {
-    fontSize: 16,
-    marginRight: 10,
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
-    color: '#9D9D9D',
+    fontSize: 16,
+    color: '#333',
     fontFamily: 'Poppins_400Regular',
+    marginLeft: 12,
   },
   sectionTitle: {
-    fontSize: 16,
-    color: '#E94057',
+    fontSize: 18,
+    color: '#333',
     fontFamily: 'Poppins_600SemiBold',
-    textAlign: 'center',
-    marginBottom: 20,
+    fontWeight: 'bold',
+    marginLeft: 20,
+    marginBottom: 16,
   },
   establishmentsScroll: {
     paddingLeft: 20,
     marginBottom: 32,
   },
   establishmentCard: {
-    width: 70,
-    height: 80,
+    width: 85,
+    height: 100,
     backgroundColor: '#fff',
-    borderRadius: 5,
-    marginRight: 15,
+    borderRadius: 16,
+    marginRight: 16,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    padding: 12,
   },
   establishmentLogo: {
-    width: 30,
-    height: 30,
-    backgroundColor: '#C4C4C4',
-    borderRadius: 15,
-    marginBottom: 5,
+    width: 45,
+    height: 45,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 22,
+    marginBottom: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  establishmentEmoji: {
+    fontSize: 24,
   },
   establishmentName: {
-    fontSize: 9,
-    color: '#000',
+    fontSize: 12,
+    color: '#333',
     textAlign: 'center',
     fontFamily: 'Poppins_400Regular',
-    fontWeight: '300',
+    fontWeight: '500',
   },
   adCarousel: {
     marginBottom: 32,
   },
   adCarouselContent: {
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
   },
   adBanner: {
-    width: 352,
-    height: 105,
-    borderRadius: 5,
+    width: 320,
+    height: 120,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 20,
+    marginHorizontal: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 10,
   },
   adText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: 'Poppins_600SemiBold',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   servicesTitle: {
-    fontSize: 16,
-    color: '#E94057',
+    fontSize: 18,
+    color: '#333',
     fontFamily: 'Poppins_600SemiBold',
-    textAlign: 'center',
-    marginBottom: 20,
+    fontWeight: 'bold',
+    marginLeft: 20,
+    marginBottom: 16,
   },
   servicesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
-    paddingHorizontal: 40,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
     marginBottom: 32,
   },
   serviceCard: {
-    width: 134,
-    height: 75,
+    width: '47%',
     backgroundColor: '#fff',
-    borderRadius: 5,
-    margin: 12.5,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
   },
   serviceLogo: {
-    width: 20,
-    height: 20,
-    backgroundColor: '#C4C4C4',
-    borderRadius: 10,
-    marginBottom: 5,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  serviceIcon: {
+    fontSize: 24,
   },
   serviceName: {
-    fontSize: 9,
-    fontFamily: 'Poppins_400Regular',
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 2,
+    marginBottom: 4,
+    color: '#333',
   },
   serviceDescription: {
-    fontSize: 6,
-    color: '#000',
+    fontSize: 12,
+    color: '#666',
     fontFamily: 'Poppins_400Regular',
     textAlign: 'center',
   },
