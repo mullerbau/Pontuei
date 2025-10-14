@@ -19,17 +19,43 @@ export default function TelaLogin() {
   const animar = () => Animated.sequence([Animated.timing(animacao, {toValue: 0.95, duration: 100, useNativeDriver: true}), Animated.timing(animacao, {toValue: 1, duration: 100, useNativeDriver: true})]).start();
 
   const fazerLogin = async () => {
-    if (erroEmail || erroSenha || !email.trim() || !senha.trim()) return Alert.alert("Erro", "Corrija os erros antes de continuar");
-    animar(); setCarregando(true);
+    if (erroEmail || erroSenha || !email.trim() || !senha.trim()) {
+      return Alert.alert("Erro", "Preencha todos os campos corretamente");
+    }
+    
+    animar();
+    setCarregando(true);
+    
     try {
+      // TODO: Substituir por chamada da API
+      // const response = await fetch('/api/login', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ email, senha })
+      // });
+      
+      // Simulação temporária com AsyncStorage
       const usuario = await AsyncStorage.getItem("usuario");
       if (usuario) {
         const dados = JSON.parse(usuario);
         if (dados.email === email && dados.senha === CryptoJS.SHA256(senha).toString()) {
-          setCarregando(false); navegacao.replace("/home");
-        } else { Alert.alert("Erro", "E-mail ou senha incorretos"); setCarregando(false); }
-      } else { Alert.alert("Erro", "Usuário não encontrado"); setCarregando(false); }
-    } catch { Alert.alert("Erro", "Tente novamente"); setCarregando(false); }
+          // TODO: Salvar token de autenticação
+          // await AsyncStorage.setItem('authToken', response.token);
+          setCarregando(false);
+          navegacao.replace("/(tabs)");
+        } else {
+          Alert.alert("Erro", "E-mail ou senha incorretos");
+          setCarregando(false);
+        }
+      } else {
+        Alert.alert("Erro", "Usuário não encontrado. Cadastre-se primeiro.");
+        setCarregando(false);
+      }
+    } catch (error) {
+      console.error('Erro no login:', error);
+      Alert.alert("Erro", "Falha na conexão. Tente novamente.");
+      setCarregando(false);
+    }
   };
 
   return (
@@ -84,8 +110,6 @@ export default function TelaLogin() {
               setSenha(texto);
               if (texto.trim() === "") {
                 setErroSenha("Senha é obrigatória");
-              } else if (texto.length < 6) {
-                setErroSenha("Senha deve ter pelo menos 6 caracteres");
               } else {
                 setErroSenha("");
               }
