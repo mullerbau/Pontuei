@@ -139,25 +139,7 @@ export default function HomeScreen() {
         </ScrollView>
       </ScrollView>
 
-      {/* Bottom Menu */}
-      <View style={styles.bottomMenu}>
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>⚫</Text>
-          <Text style={styles.menuText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>⚫</Text>
-          <Text style={styles.menuText}>Procura</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>⚫</Text>
-          <Text style={styles.menuText}>Pedidos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>⚫</Text>
-          <Text style={styles.menuText}>Perfil</Text>
-        </TouchableOpacity>
-      </View>
+
     </SafeAreaView>
   );
 }
@@ -168,7 +150,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   scrollContent: {
-    paddingBottom: 90,
+    paddingBottom: 20,
   },
   logoContainer: {
     alignItems: 'center',
@@ -335,30 +317,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_400Regular',
     textAlign: 'center',
   },
-  bottomMenu: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 70,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  menuItem: {
-    alignItems: 'center',
-  },
-  menuIcon: {
-    fontSize: 20,
-    marginBottom: 4,
-    color: '#000',
-  },
-  menuText: {
-    fontSize: 10,
-    fontFamily: 'Poppins_400Regular',
-    color: '#000',
-  },
+
 });
