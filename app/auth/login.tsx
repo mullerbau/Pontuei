@@ -1,21 +1,35 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar, ScrollView, Alert, ActivityIndicator, Animated } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { Ionicons } from '@expo/vector-icons';
+import CryptoJS from 'crypto-js';
 
 export default function TelaLogin() {
   const navegacao = useRouter();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [erroEmail, setErroEmail] = useState("");
+  const [erroSenha, setErroSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [carregando, setCarregando] = useState(false);
+  const animacao = useRef(new Animated.Value(1)).current;
+
+  const animar = () => Animated.sequence([Animated.timing(animacao, {toValue: 0.95, duration: 100, useNativeDriver: true}), Animated.timing(animacao, {toValue: 1, duration: 100, useNativeDriver: true})]).start();
 
   const fazerLogin = async () => {
-    if (email && senha) {
-      await AsyncStorage.setItem("usuario", JSON.stringify({ email }));
-      navegacao.replace("/(tabs)");
-    } else {
-      alert("Preencha todos os campos!");
-    }
+    if (erroEmail || erroSenha || !email.trim() || !senha.trim()) return Alert.alert("Erro", "Corrija os erros antes de continuar");
+    animar(); setCarregando(true);
+    try {
+      const usuario = await AsyncStorage.getItem("usuario");
+      if (usuario) {
+        const dados = JSON.parse(usuario);
+        if (dados.email === email && dados.senha === CryptoJS.SHA256(senha).toString()) {
+          setCarregando(false); navegacao.replace("/home");
+        } else { Alert.alert("Erro", "E-mail ou senha incorretos"); setCarregando(false); }
+      } else { Alert.alert("Erro", "Usuário não encontrado"); setCarregando(false); }
+    } catch { Alert.alert("Erro", "Tente novamente"); setCarregando(false); }
   };
 
   return (
@@ -42,35 +56,80 @@ export default function TelaLogin() {
         <Text style={estilos.label}>E-Mail</Text>
         <TextInput
           placeholder="seuemail@gmail.com"
-          style={estilos.input}
+          style={[estilos.input, erroEmail ? estilos.inputErro : null]}
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(texto) => {
+            setEmail(texto);
+            if (texto.trim() === "") {
+              setErroEmail("E-mail é obrigatório");
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(texto)) {
+              setErroEmail("Digite um e-mail válido");
+            } else {
+              setErroEmail("");
+            }
+          }}
           keyboardType="email-address"
           autoCapitalize="none"
         />
+        {erroEmail ? <Text style={estilos.textoErro}>{erroEmail}</Text> : null}
         
         <Text style={estilos.label}>Senha</Text>
-        <TextInput
-          placeholder="*********"
-          secureTextEntry
-          style={estilos.input}
-          value={senha}
-          onChangeText={setSenha}
-        />
+        <View style={estilos.containerSenha}>
+          <TextInput
+            placeholder="*********"
+            secureTextEntry={!mostrarSenha}
+            style={[estilos.inputSenha, erroSenha ? estilos.inputErro : null]}
+            value={senha}
+            onChangeText={(texto) => {
+              setSenha(texto);
+              if (texto.trim() === "") {
+                setErroSenha("Senha é obrigatória");
+              } else if (texto.length < 6) {
+                setErroSenha("Senha deve ter pelo menos 6 caracteres");
+              } else {
+                setErroSenha("");
+              }
+            }}
+            accessibilityLabel="Campo de senha"
+          />
+          <TouchableOpacity 
+            style={estilos.botaoMostrarSenha}
+            onPress={() => setMostrarSenha(!mostrarSenha)}
+            accessibilityLabel={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+          >
+            <Ionicons 
+              name={mostrarSenha ? "eye-off" : "eye"} 
+              size={20} 
+              color="#666" 
+            />
+          </TouchableOpacity>
+        </View>
+        {erroSenha ? <Text style={estilos.textoErro}>{erroSenha}</Text> : null}
         <Text style={estilos.esqueceuSenha}>Esqueceu minha senha</Text>
       </View>
 
       {/* Botão Login */}
-      <TouchableOpacity onPress={fazerLogin}>
-        <LinearGradient
-          colors={['#ff3366', '#ff5e5e']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={estilos.botaoCta}
+      <Animated.View style={{ transform: [{ scale: animacao }] }}>
+        <TouchableOpacity 
+          onPress={fazerLogin}
+          disabled={carregando}
+          accessibilityLabel="Botão de login"
+          accessibilityHint="Toque para fazer login com suas credenciais"
         >
-          <Text style={estilos.textoBotao}>Login</Text>
-        </LinearGradient>
-      </TouchableOpacity>
+          <LinearGradient
+            colors={carregando ? ['#ccc', '#999'] : ['#ff3366', '#ff5e5e']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={estilos.botaoCta}
+          >
+            {carregando ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={estilos.textoBotao}>Login</Text>
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
+      </Animated.View>
 
       {/* Entrar com */}
       <Text style={estilos.entrarCom}>Entrar com</Text>
@@ -222,5 +281,32 @@ const estilos = StyleSheet.create({
     fontSize: 14,
     color: "#ff4757",
     fontWeight: "600",
+  },
+  inputErro: {
+    borderColor: "#ff4757",
+    borderWidth: 2,
+  },
+  textoErro: {
+    color: "#ff4757",
+    fontSize: 12,
+    marginTop: -8,
+    marginBottom: 8,
+  },
+  containerSenha: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    marginBottom: 12,
+  },
+  inputSenha: {
+    flex: 1,
+    padding: 14,
+    fontSize: 15,
+  },
+  botaoMostrarSenha: {
+    padding: 14,
   },
 });
