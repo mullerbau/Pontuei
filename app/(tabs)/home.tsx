@@ -106,7 +106,6 @@ export default function HomeScreen() {
                 style={styles.logo}
                 resizeMode="contain"
               />
-              <Text style={styles.pontueiText}>Pontuei.</Text>
             </View>
           </View>
           
