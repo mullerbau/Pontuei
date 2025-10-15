@@ -1,7 +1,25 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet } from 'react-native';
+import { CartProvider, useCart } from '../../contexts/CartContext';
 
-export default function TabLayout() {
+function TabBarIcon({ name, color, size }: { name: any, color: string, size: number }) {
+  const { itemCount } = useCart();
+  const showBadge = name === 'receipt' && itemCount > 0;
+  
+  return (
+    <View style={styles.iconContainer}>
+      <Ionicons name={name} color={color} size={size} />
+      {showBadge && (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{itemCount}</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
+function TabLayoutContent() {
   return (
     <Tabs
       screenOptions={{
@@ -29,7 +47,7 @@ export default function TabLayout() {
         options={{
           title: "Buscar",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" color={color} size={size} marginBottom= '10px'/>
+            <Ionicons name="search" color={color} size={size} />
           ),
         }}
       />
@@ -38,8 +56,14 @@ export default function TabLayout() {
         options={{
           title: "Pedidos",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="receipt" color={color} size={size} />
+            <TabBarIcon name="receipt" color={color} size={size} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="loja"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen
@@ -60,5 +84,35 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+export default function TabLayout() {
+  return (
+    <CartProvider>
+      <TabLayoutContent />
+    </CartProvider>
+  );
+}
+
+const styles = StyleSheet.create({
+  iconContainer: {
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -5,
+    right: -8,
+    backgroundColor: '#E94057',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+});
 
 

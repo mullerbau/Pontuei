@@ -3,14 +3,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+
+const restaurantImages = {
+  diade: require('@/assets/images/logo-restaurantes/diade.jpg'),
+  ampm: require('@/assets/images/logo-restaurantes/ampm.png'),
+  differ: require('@/assets/images/logo-restaurantes/differ.jpg'),
+  versa: require('@/assets/images/logo-restaurantes/versa.jpg'),
+};
 
 const establishments = [
-  { id: 1, name: 'McDonald\'s', image: '' },
-  { id: 2, name: 'Burger King', image: '' },
-  { id: 3, name: 'Starbucks', image: '' },
-  { id: 4, name: 'Subway', image: '' },
-  { id: 5, name: 'Outback', image: '' },
-  { id: 6, name: 'Habib\'s', image: '' },
+  { id: 1, name: 'DiaDe', image: restaurantImages.diade },
+  { id: 2, name: 'AM/PM', image: restaurantImages.ampm },
+  { id: 3, name: 'Differ', image: restaurantImages.differ },
+  { id: 4, name: 'Versa', image: restaurantImages.versa },
 ];
 
 const services = [
@@ -27,19 +33,23 @@ const adBanners = [
 ];
 
 const nearbyStores = [
-  { id: 1, name: 'DiaDe', image: '' },
-  { id: 2, name: 'KFC', image: '' },
-  { id: 3, name: 'Domino\'s', image: '🍕' },
-  { id: 4, name: 'Taco Bell', image: '🌮' },
-  { id: 5, name: 'Outback', image: '🥩' },
-  { id: 6, name: 'Habib\'s', image: '🥙' },
+  { id: 1, name: 'DiaDe', image: restaurantImages.diade },
+  { id: 2, name: 'AM/PM', image: restaurantImages.ampm },
+  { id: 3, name: 'Differ', image: restaurantImages.differ },
+  { id: 4, name: 'Versa', image: restaurantImages.versa },
 ];
 
 function EstablishmentCard({ name, image }) {
+  const handlePress = () => {
+    if (name === 'DiaDe') {
+      router.push('/loja');
+    }
+  };
+
   return (
-    <TouchableOpacity style={styles.establishmentCard}>
+    <TouchableOpacity style={styles.establishmentCard} onPress={handlePress}>
       <View style={styles.establishmentLogo}>
-        <Text style={styles.establishmentEmoji}>{image}</Text>
+        <Image source={image} style={styles.establishmentImage} resizeMode="cover" />
       </View>
       <Text style={styles.establishmentName}>{name}</Text>
     </TouchableOpacity>
@@ -110,8 +120,14 @@ export default function HomeScreen() {
           </View>
           
           <View style={styles.welcomeContainer}>
-            <Text style={styles.welcomeText}>Bem vindo de volta! 👋</Text>
-            <Text style={styles.userName}>Eric Bauer</Text>
+            <Image 
+              source={require('@/assets/images/icon.jpg')}
+              style={styles.profileImage}
+            />
+            <View style={styles.welcomeTexts}>
+              <Text style={styles.welcomeText}>Bem vindo de volta.</Text>
+              <Text style={styles.userName}>Eric Bauer!</Text>
+            </View>
           </View>
 
         {/* Search Bar */}
@@ -151,7 +167,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Nearby Stores */}
-        <Text style={styles.sectionTitle}>📍 Lojas próximas de você</Text>
+        <Text style={styles.sectionTitle}>Lojas próximas de você</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.establishmentsScroll}>
           {nearbyStores.map((item) => (
             <EstablishmentCard key={item.id} name={item.name} image={item.image} />
@@ -174,7 +190,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '20vh',
+    height: '15vh',
     marginBottom: 20,
     
   },
@@ -182,12 +198,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 10,
   },
   logo: {
-    width: 40,
-    height: 40,
-    marginRight: 8,
+    width: 60,
+    height: 60,
+  
   },
   pontueiText: {
     color: '#000000ff',
@@ -198,8 +214,19 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   welcomeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 20,
     marginLeft: 15,
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 15,
+  },
+  welcomeTexts: {
+    flex: 1,
   },
   welcomeText: {
     fontSize: 14,
@@ -251,7 +278,6 @@ const styles = StyleSheet.create({
     color: '#E94057',
     fontFamily: 'Poppins_600SemiBold',
     fontWeight: 'bold',
-    marginLeft: 20,
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -263,7 +289,7 @@ const styles = StyleSheet.create({
     width: 85,
     height: 100,
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 10,
     marginRight: 16,
     marginBottom: 3,
     justifyContent: 'center',
@@ -283,9 +309,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
-  establishmentEmoji: {
-    fontSize: 24,
+  establishmentImage: {
+    width: 45,
+    height: 45,
+    borderRadius: 22,
   },
   establishmentName: {
     fontSize: 12,
@@ -302,9 +331,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   adBanner: {
-    width: 320,
+    width: 370,
     height: 120,
-    borderRadius: 20,
+    borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 8,
@@ -312,6 +341,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
+    marginLeft:30,
     elevation: 10,
   },
   adText: {
@@ -331,7 +361,7 @@ const styles = StyleSheet.create({
   serviceCard: {
     width: '47%',
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 10,
     padding: 20,
     marginBottom: 16,
     justifyContent: 'center',
