@@ -1,35 +1,34 @@
-import React from 'react';
-import { ScrollView, View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Poppins_400Regular, Poppins_600SemiBold, useFonts } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
-import { useFonts, Poppins_400Regular, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const establishments = [
-  { id: 1, name: 'McDonald\'s', image: '🍔' },
-  { id: 2, name: 'Burger King', image: '🍟' },
-  { id: 3, name: 'Starbucks', image: '☕' },
-  { id: 4, name: 'Subway', image: '🥪' },
-  { id: 5, name: 'Outback', image: '🥩' },
-  { id: 6, name: 'Habib\'s', image: '🥙' },
+  { id: 1, name: 'McDonald\'s', image: '' },
+  { id: 2, name: 'Burger King', image: '' },
+  { id: 3, name: 'Starbucks', image: '' },
+  { id: 4, name: 'Subway', image: '' },
+  { id: 5, name: 'Outback', image: '' },
+  { id: 6, name: 'Habib\'s', image: '' },
 ];
 
 const services = [
-  { id: 1, name: 'Delivery', description: 'Entrega rápida', icon: '🚚' },
-  { id: 2, name: 'Retirada', description: 'Retire no local', icon: '🏪' },
-  { id: 3, name: 'Pontos', description: 'Acumule pontos', icon: '⭐' },
-  { id: 4, name: 'Ofertas', description: 'Promoções especiais', icon: '🎁' },
+  { id: 1, name: 'Barbearias', description: 'Agende seu corte pelo App!', icon: '' },
+  { id: 2, name: 'Manicure', description: 'Faça suas unhas lindondass', icon: '' },
+  { id: 3, name: 'Pedicure', description: 'Faça seu pézin feioso', icon: '' },
+  { id: 4, name: 'Cafeterias', description: 'Aproveite um café quentinho', icon: '' },
 ];
 
 const adBanners = [
-  { id: 1, text: '🎉 Novidades e Ofertas', colors: ['#ff3366', '#ff5e5e'] },
-  { id: 2, text: '🔥 Promoções Especiais', colors: ['#ff3366', '#ff5e5e'] },
-  { id: 3, text: '⭐ Pontos em Dobro', colors: ['#ff3366', '#ff5e5e'] },
+  { id: 1, text: ' APROVEITA A PROMOÇÃO LOCK', colors: ['#ff3366', '#ff5e5e'] },
+  { id: 2, text: ' Promoções Especiais', colors: ['#ff3366', '#ff5e5e'] },
+  { id: 3, text: ' Pontos em Dobro', colors: ['#ff3366', '#ff5e5e'] },
 ];
 
 const nearbyStores = [
-  { id: 1, name: 'Pizza Hut', image: '🍕' },
-  { id: 2, name: 'KFC', image: '🍗' },
+  { id: 1, name: 'DiaDe', image: '' },
+  { id: 2, name: 'KFC', image: '' },
   { id: 3, name: 'Domino\'s', image: '🍕' },
   { id: 4, name: 'Taco Bell', image: '🌮' },
   { id: 5, name: 'Outback', image: '🥩' },
@@ -99,7 +98,6 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Header com gradiente */}
 
           <View style={styles.headerContent}>
             <View style={styles.logoContainer}>
@@ -130,7 +128,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Last Visited Establishments */}
-        <Text style={styles.sectionTitle}>🏪 Últimos estabelecimentos visitados</Text>
+        <Text style={styles.sectionTitle}>Últimos estabelecimentos visitados</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.establishmentsScroll}>
           {establishments.map((item) => (
             <EstablishmentCard key={item.id} name={item.name} image={item.image} />
@@ -141,7 +139,7 @@ export default function HomeScreen() {
         <AdBannerCarousel />
 
         {/* Services Section */}
-        <Text style={styles.servicesTitle}>🚀 Serviços</Text>
+        <Text style={styles.servicesTitle}>Serviços</Text>
         <View style={styles.servicesGrid}>
           {services.map((service) => (
             <ServiceCard
@@ -243,18 +241,19 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    color: '#333',
+    color: '#E94057',
     fontFamily: 'Poppins_600SemiBold',
     fontWeight: 'bold',
-    marginLeft: 20,
+    textAlign: 'center',
     marginBottom: 16,
   },
   servicesTitle: {
     fontSize: 18,
-    color: '#333',
+    color: '#E94057',
     fontFamily: 'Poppins_600SemiBold',
     fontWeight: 'bold',
     marginLeft: 20,
+    textAlign: 'center',
     marginBottom: 16,
   },
   establishmentsScroll: {
@@ -267,6 +266,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 16,
     marginRight: 16,
+    marginBottom: 3,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',

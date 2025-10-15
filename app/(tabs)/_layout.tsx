@@ -29,7 +29,7 @@ export default function TabLayout() {
         options={{
           title: "Buscar",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" color={color} size={size} />
+            <Ionicons name="search" color={color} size={size} marginBottom= '10px'/>
           ),
         }}
       />
@@ -60,3 +60,5 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+
