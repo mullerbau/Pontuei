@@ -28,9 +28,9 @@ export default function Home() {
       <View style={estilos.header}>
         <View style={estilos.logoContainer}>
           <View style={estilos.logo}>
-            <Text style={estilos.logoText}>P</Text>
+            <Text style={estilos.logoText}></Text>
           </View>
-          <Text style={estilos.pontueiText}>Pontuei.</Text>
+          <Text style={estilos.pontueiText}></Text>
         </View>
         
         <TouchableOpacity 

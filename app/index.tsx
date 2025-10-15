@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, StatusBar, Animated } from "react-native";
+import { View, Text, StyleSheet, StatusBar, Animated, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
+import { SvgUri } from 'react-native-svg';
 
 export default function TelaBoasVindas() {
   const router = useRouter();
@@ -46,7 +47,11 @@ export default function TelaBoasVindas() {
       >
         {/* Logo */}
         <View style={estilos.logo}>
-          <Text style={estilos.logoText}>P</Text>
+          <Image 
+            source={require('@/assets/images/pontuei logo.svg')}
+            style={estilos.logoImage}
+            resizeMode="contain"
+          />
         </View>
         
         <Text style={estilos.pontueiText}>Pontuei.</Text>
@@ -79,24 +84,13 @@ const estilos = StyleSheet.create({
   logo: {
     width: 80,
     height: 80,
-    backgroundColor: "#ff4757",
-    borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
-    shadowColor: "#ff4757",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
-  logoText: {
-    color: "white",
-    fontSize: 36,
-    fontWeight: "bold",
+  logoImage: {
+    width: 80,
+    height: 80,
   },
   pontueiText: {
     fontSize: 28,
