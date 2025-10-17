@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, ScrollView 
 import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../contexts/CartContext';
 import { useFonts, Poppins_400Regular, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
+import { router } from 'expo-router';
 
 const PRIMARY_COLOR = '#E94057';
 
@@ -65,7 +66,13 @@ export default function CartModal() {
           {items.length > 0 && (
             <View style={styles.footer}>
               <Text style={styles.total}>Total: R$ {total.toFixed(2).replace('.', ',')}</Text>
-              <TouchableOpacity style={styles.orderButton}>
+              <TouchableOpacity 
+                style={styles.orderButton}
+                onPress={() => {
+                  handleClose();
+                  router.push('/finalizacao-pedido');
+                }}
+              >
                 <Text style={styles.orderButtonText}>Finalizar Pedido</Text>
               </TouchableOpacity>
             </View>

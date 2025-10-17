@@ -81,15 +81,13 @@ function AdBannerCarousel() {
       contentContainerStyle={styles.adCarouselContent}
     >
       {adBanners.map((banner) => (
-        <LinearGradient
-          key={banner.id}
-          colors={banner.colors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.adBanner}
-        >
-          <Text style={styles.adText}>{banner.text}</Text>
-        </LinearGradient>
+        <View key={banner.id} style={styles.adBanner}>
+          <Image 
+            source={require('@/assets/images/carroussel-ads/ad1.png')}
+            style={styles.adBannerImage}
+            resizeMode="cover"
+          />
+        </View>
       ))}
     </ScrollView>
   );
@@ -143,6 +141,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Last Visited Establishments */}
+        
         <Text style={styles.sectionTitle}>Últimos estabelecimentos visitados</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.establishmentsScroll}>
           {establishments.map((item) => (
@@ -154,7 +153,7 @@ export default function HomeScreen() {
         <AdBannerCarousel />
 
         {/* Services Section */}
-        <Text style={styles.servicesTitle}>Serviços</Text>
+        <Text style={styles.sectionTitle}>Serviços</Text>
         <View style={styles.servicesGrid}>
           {services.map((service) => (
             <ServiceCard
@@ -210,9 +209,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-  notificationButton: {
-    padding: 8,
-  },
   welcomeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -266,15 +262,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   sectionTitle: {
-    fontSize: 18,
-    color: '#E94057',
-    fontFamily: 'Poppins_600SemiBold',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  servicesTitle: {
-    fontSize: 18,
+    fontSize: 20,
     color: '#E94057',
     fontFamily: 'Poppins_600SemiBold',
     fontWeight: 'bold',
@@ -286,12 +274,12 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   establishmentCard: {
-    width: 85,
-    height: 100,
+    width: '25%',
+    height: 110,
     backgroundColor: '#fff',
     borderRadius: 10,
     marginRight: 16,
-    marginBottom: 3,
+    marginBottom: 5,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -306,7 +294,7 @@ const styles = StyleSheet.create({
     height: 45,
     backgroundColor: '#f8f9fa',
     borderRadius: 22,
-    marginBottom: 8,
+    marginBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
@@ -331,7 +319,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   adBanner: {
-    width: 370,
+    width: '85vw',
     height: 120,
     borderRadius: 15,
     justifyContent: 'center',
@@ -341,8 +329,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
-    marginLeft:30,
+    marginLeft:33,
     elevation: 10,
+    overflow: 'hidden',
+  },
+  adBannerImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
   adText: {
     color: '#fff',

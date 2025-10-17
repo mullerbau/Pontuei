@@ -8,7 +8,7 @@ function CartIcon({ color, size }: { color: string, size: number }) {
   const { itemCount, showCart } = useCart();
   
   return (
-    <TouchableOpacity onPress={showCart} style={[styles.iconContainer, { flex: 1, justifyContent: 'center', alignItems: 'center' }]}>
+    <TouchableOpacity onPress={showCart} style={styles.cartIconContainer}>
       <View style={styles.iconWrapper}>
         <Ionicons name="receipt" color={color} size={size} />
         {itemCount > 0 && (
@@ -30,6 +30,16 @@ function TabLayoutContent() {
           headerShown: false,
           tabBarActiveTintColor: "#E94057",
           tabBarInactiveTintColor: "#666",
+          tabBarStyle: {
+            paddingVertical: 10,
+            height: 60,
+            paddingHorizontal: 20,
+          },
+          tabBarItemStyle: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingVertical: 5,
+          },
         }}>
       <Tabs.Screen
         name="index"
@@ -88,6 +98,12 @@ function TabLayoutContent() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="finalizacao-pedido"
+        options={{
+          href: null,
+        }}
+      />
       </Tabs>
       <CartModal />
     </>
@@ -105,6 +121,12 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   iconContainer: {
     position: 'relative',
+  },
+  cartIconContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 5,
   },
   iconWrapper: {
     position: 'relative',
