@@ -1,32 +1,36 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { CartProvider, useCart } from '../../contexts/CartContext';
+import CartModal from '../../components/CartModal';
 
-function TabBarIcon({ name, color, size }: { name: any, color: string, size: number }) {
-  const { itemCount } = useCart();
-  const showBadge = name === 'receipt' && itemCount > 0;
+function CartIcon({ color, size }: { color: string, size: number }) {
+  const { itemCount, showCart } = useCart();
   
   return (
-    <View style={styles.iconContainer}>
-      <Ionicons name={name} color={color} size={size} />
-      {showBadge && (
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{itemCount}</Text>
-        </View>
-      )}
-    </View>
+    <TouchableOpacity onPress={showCart} style={[styles.iconContainer, { flex: 1, justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={styles.iconWrapper}>
+        <Ionicons name="receipt" color={color} size={size} />
+        {itemCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{itemCount}</Text>
+          </View>
+        )}
+      </View>
+      <Text style={[{ color, fontSize: 10, marginTop: 2 }]}>Pedidos</Text>
+    </TouchableOpacity>
   );
 }
 
 function TabLayoutContent() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: "#E94057",
-        tabBarInactiveTintColor: "#666",
-      }}>
+    <>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: "#E94057",
+          tabBarInactiveTintColor: "#666",
+        }}>
       <Tabs.Screen
         name="index"
         options={{
@@ -51,19 +55,20 @@ function TabLayoutContent() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="pedidos"
-        options={{
-          title: "Pedidos",
-          tabBarIcon: ({ color, size }) => (
-            <TabBarIcon name="receipt" color={color} size={size} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="loja"
         options={{
           href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="pedidos"
+        options={{
+          title: "Pedidos",
+          tabBarButton: (props) => (
+            <CartIcon color={props.color || "#666"} size={24} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -75,13 +80,17 @@ function TabLayoutContent() {
           ),
         }}
       />
+      
+
       <Tabs.Screen
         name="explore"
         options={{
           href: null,
         }}
       />
-    </Tabs>
+      </Tabs>
+      <CartModal />
+    </>
   );
 }
 
@@ -97,10 +106,13 @@ const styles = StyleSheet.create({
   iconContainer: {
     position: 'relative',
   },
+  iconWrapper: {
+    position: 'relative',
+  },
   badge: {
     position: 'absolute',
-    top: -5,
-    right: -8,
+    top: -8,
+    right: -10,
     backgroundColor: '#E94057',
     borderRadius: 10,
     minWidth: 18,

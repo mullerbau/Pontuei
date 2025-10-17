@@ -1,24 +1,39 @@
 import { Poppins_400Regular, Poppins_600SemiBold, useFonts } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
 import { useCart } from '../../contexts/CartContext';
+import { store } from 'expo-router/build/global-state/router-store';
+
+const PRIMARY_COLOR = '#E94057';
 
 const restaurantImages = {
   diade: require('@/assets/images/logo-restaurantes/diade.jpg'),
   ampm: require('@/assets/images/logo-restaurantes/ampm.png'),
   differ: require('@/assets/images/logo-restaurantes/differ.jpg'),
   versa: require('@/assets/images/logo-restaurantes/versa.jpg'),
+  cannabis: require('@/assets/images/logo-restaurantes/cannabis store.jpg'),
 };
 
+const restaurantProducts = {
+  redVeltetCookie: require('@/assets/images/diade-images/red velvet cookie.jpeg'),
+  capuccinoCookie: require('@/assets/images/diade-images/capuccino cookie.jpeg'),
+  brownie: require('@/assets/images/diade-images/brownie.png'),
+  coffeeCup: require('@/assets/images/diade-images/coffee cup.png'),
+  sodaItaliana: require('@/assets/images/diade-images/soda italiana.jpg'),
+  coldBrew: require('@/assets/images/diade-images/cold brew.jpeg'),
+  chocolateNozesCookie: require('@/assets/images/diade-images/chocolate e nozes cookie.jpeg'),
+}; 
+
 const products = [
-  { id: 1, name: 'Hambúrguer Clássico', price: 'R$ 15,90', image:'' },
-  { id: 2, name: 'Pizza Margherita', price: 'R$ 28,50', image: '' },
-  { id: 3, name: 'Café Expresso', price: 'R$ 4,50', image: '' },
-  { id: 4, name: 'Açaí 500ml', price: 'R$ 12,90', image: '' },
-  { id: 5, name: 'Sanduíche Natural', price: 'R$ 8,90', image: '' },
-  { id: 6, name: 'Suco Natural', price: 'R$ 6,50', image: '' },
+  { id: 1, name: 'Red Velvet Cookie', price: 'R$ 7,95', image: restaurantProducts.redVeltetCookie },
+  { id: 2, name: 'Capuccino Cookie', price: 'R$ 7,95', image: restaurantProducts.capuccinoCookie },
+  { id: 3, name: 'Chcolate e Nozes Cookie', price: 'R$ 6,95', image: restaurantProducts.chocolateNozesCookie },
+  { id: 4, name: 'Coffee Cup', price: 'R$ 8,90', image: restaurantProducts.coffeeCup },
+  { id: 5, name: 'Cold Brew', price: 'R$ 12,80', image: restaurantProducts.coldBrew },
+  { id: 6, name: 'Soda Italiana', price: 'R$ 15,50', image: restaurantProducts.sodaItaliana },
+  { id: 6, name: 'Brownie', price: 'R$ 7,90', image: restaurantProducts.brownie },
 ];
 
 function ProductCard({ id, name, price, image }) {
@@ -30,7 +45,7 @@ function ProductCard({ id, name, price, image }) {
 
   return (
     <TouchableOpacity style={styles.productCard}>
-      <Text style={styles.productImage}>{image}</Text>
+      <Image source={image} style={styles.productImage} />
       <View style={styles.productInfo}>
         <Text style={styles.productName}>{name}</Text>
         <Text style={styles.productPrice}>{price}</Text>
@@ -56,21 +71,23 @@ export default function LojaScreen() {
     <SafeAreaView style={styles.container}>
       {/* Back Button */}
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="#E94057" />
+        <Ionicons name="arrow-back" size={24} color={PRIMARY_COLOR} />
       </TouchableOpacity>
       
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Store Header */}
         <View style={styles.storeHeader}>
-          <Image 
-            source={restaurantImages.diade}
-            style={styles.storeLogo}
-            resizeMode="cover"
-          />
+          <View style={styles.logoContainer}>
+            <Image 
+              source={restaurantImages.diade}
+              style={styles.storeLogo}
+              resizeMode="cover"
+            />
+          </View>
         </View>
         <View>
           <Text style={styles.storeName}>DiaDe</Text>
-          <Text style={styles.storeDescription}>Cafeteria • Aberto até 22h</Text>
+          <Text style={styles.storeDescription}>Cafeteria | Aberto até 22h</Text>
         </View>
 
         {/* Products Section */}
@@ -115,21 +132,33 @@ const styles = StyleSheet.create({
   storeHeader: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#fff',
+    width: '100%',
+    height: 150,
+    backgroundColor: PRIMARY_COLOR,
     marginBottom: 20,
   },
+  logoContainer: {
+    width: 106,
+    height: 106,
+    borderRadius: 53,
+    backgroundColor: '#f8f9fa',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 75,
+    marginBottom: 25,
+  },
   storeLogo: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 15,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   storeName: {
     fontSize: 24,
     fontFamily: 'Poppins_600SemiBold',
     textAlign: 'center',
-    color: '#E94057',
+    color: PRIMARY_COLOR,
     marginBottom: 5,
+    marginTop: 40,
   },
   storeDescription: {
     fontSize: 14,
@@ -144,7 +173,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'Poppins_600SemiBold',
-    color: '#E94057',
+    color: PRIMARY_COLOR,
     textAlign: 'center',
     marginBottom: 25,
   },
@@ -155,7 +184,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 15,
+    padding: 25,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -164,7 +193,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   productImage: {
-    fontSize: 40,
+    width: 80,
+    height: 80,
+    borderRadius: 8,
     marginRight: 15,
   },
   productInfo: {
@@ -179,10 +210,10 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
-    color: '#E94057',
+    color: PRIMARY_COLOR,
   },
   addButton: {
-    backgroundColor: '#E94057',
+    backgroundColor: PRIMARY_COLOR,
     width: 35,
     height: 35,
     borderRadius: 17,

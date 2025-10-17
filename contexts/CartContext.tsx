@@ -10,13 +10,18 @@ interface CartItem {
 interface CartContextType {
   items: CartItem[];
   addItem: (item: Omit<CartItem, 'quantity'>) => void;
+  removeItem: (id: number) => void;
   itemCount: number;
+  showCart: () => void;
+  setShowCartModal: (show: boolean) => void;
+  showCartModal: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [showCartModal, setShowCartModal] = useState(false);
 
   const addItem = (newItem: Omit<CartItem, 'quantity'>) => {
     setItems(prev => {
@@ -34,8 +39,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
+  const showCart = () => {
+    setShowCartModal(true);
+  };
+
+  const removeItem = (id: number) => {
+    setItems(prev => prev.filter(item => item.id !== id));
+  };
+
   return (
-    <CartContext.Provider value={{ items, addItem, itemCount }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, itemCount, showCart, setShowCartModal, showCartModal }}>
       {children}
     </CartContext.Provider>
   );
