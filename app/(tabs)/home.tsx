@@ -1,9 +1,12 @@
 import { Poppins_400Regular, Poppins_600SemiBold, useFonts } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+
+const { width } = Dimensions.get('window');
+const isTablet = width > 425;
 
 const restaurantImages = {
   diade: require('@/assets/images/logo-restaurantes/diade.jpg'),
@@ -274,8 +277,8 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   establishmentCard: {
-    width: '25%',
-    height: 110,
+    width: isTablet ? 120 : 85,
+    height: isTablet ? 130 : 110,
     backgroundColor: '#fff',
     borderRadius: 10,
     marginRight: 16,
@@ -290,22 +293,22 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   establishmentLogo: {
-    width: 45,
-    height: 45,
+    width: isTablet ? 55 : 45,
+    height: isTablet ? 55 : 45,
     backgroundColor: '#f8f9fa',
-    borderRadius: 22,
+    borderRadius: isTablet ? 27 : 22,
     marginBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
   },
   establishmentImage: {
-    width: 45,
-    height: 45,
-    borderRadius: 22,
+    width: isTablet ? 55 : 45,
+    height: isTablet ? 55 : 45,
+    borderRadius: isTablet ? 27 : 22,
   },
   establishmentName: {
-    fontSize: 12,
+    fontSize: isTablet ? 14 : 12,
     color: '#333',
     textAlign: 'center',
     fontFamily: 'Poppins_400Regular',
@@ -319,8 +322,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   adBanner: {
-    width: '85vw',
-    height: 120,
+    width: isTablet ? width * 0.7 : '85vw',
+    height: isTablet ? 160 : 120,
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
@@ -329,7 +332,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
-    marginLeft:33,
+    marginLeft: isTablet ? 40 : 33,
     elevation: 10,
     overflow: 'hidden',
   },
