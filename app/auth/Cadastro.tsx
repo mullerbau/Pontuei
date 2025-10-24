@@ -148,6 +148,22 @@ export default function TelaCadastro() {
         {erroConfirmarSenha ? <Text style={estilos.textoErro}>{erroConfirmarSenha}</Text> : null}
       </View>
 
+      {/* Botão Demo */}
+      <TouchableOpacity 
+        style={estilos.botaoDemo}
+        onPress={() => {
+          setEmail("demo@pontuei.com");
+          setSenha("123456");
+          setConfirmarSenha("123456");
+          setErroEmail("");
+          setErroSenha("");
+          setErroConfirmarSenha("");
+        }}
+      >
+        <Ionicons name="flash" size={16} color="#ff4757" />
+        <Text style={estilos.textoBotaoDemo}>Preencher para Demo</Text>
+      </TouchableOpacity>
+
       {/* Botão Cadastrar */}
       <Animated.View style={{ transform: [{ scale: animacaoBotao }] }}>
         <TouchableOpacity 
@@ -335,5 +351,22 @@ const estilos = StyleSheet.create({
   },
   botaoMostrarSenha: {
     padding: 14,
+  },
+  botaoDemo: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#ff4757",
+    gap: 6,
+  },
+  textoBotaoDemo: {
+    color: "#ff4757",
+    fontSize: 14,
+    fontWeight: "500",
   },
 });
