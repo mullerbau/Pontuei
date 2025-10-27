@@ -1,11 +1,10 @@
 import { Poppins_400Regular, Poppins_600SemiBold, useFonts } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useRef, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCart } from '../../contexts/CartContext';
-import { useState, useRef } from 'react';
-import { Dimensions } from 'react-native';
 
 const PRIMARY_COLOR = '#E94057';
 
@@ -45,13 +44,13 @@ const products = [
 ];
 
 const pointsProducts = [
-  { id: 1, name: 'Red Velvet Cookie', price: '150 pts', image: restaurantProducts.redVeltetCookie, category: 'cookies' },
-  { id: 2, name: 'Capuccino Cookie', price: '150 pts', image: restaurantProducts.capuccinoCookie, category: 'cookies' },
-  { id: 3, name: 'Chcolate e Nozes Cookie', price: '130 pts', image: restaurantProducts.chocolateNozesCookie, category: 'cookies' },
-  { id: 4, name: 'Coffee Cup', price: '170 pts', image: restaurantProducts.coffeeCup, category: 'bebidas' },
-  { id: 5, name: 'Cold Brew', price: '240 pts', image: restaurantProducts.coldBrew, category: 'bebidas' },
-  { id: 6, name: 'Soda Italiana', price: '290 pts', image: restaurantProducts.sodaItaliana, category: 'bebidas' },
-  { id: 7, name: 'Brownie', price: '150 pts', image: restaurantProducts.brownie, category: 'brownies' },
+  { id: 1, name: 'Red Velvet Cookie', price: '150 pontos', image: restaurantProducts.redVeltetCookie, category: 'cookies' },
+  { id: 2, name: 'Capuccino Cookie', price: '150 pontos', image: restaurantProducts.capuccinoCookie, category: 'cookies' },
+  { id: 3, name: 'Chcolate e Nozes Cookie', price: '130 pontos', image: restaurantProducts.chocolateNozesCookie, category: 'cookies' },
+  { id: 4, name: 'Coffee Cup', price: '170 pontos', image: restaurantProducts.coffeeCup, category: 'bebidas' },
+  { id: 5, name: 'Cold Brew', price: '240 pontos', image: restaurantProducts.coldBrew, category: 'bebidas' },
+  { id: 6, name: 'Soda Italiana', price: '290 pontos', image: restaurantProducts.sodaItaliana, category: 'bebidas' },
+  { id: 7, name: 'Brownie', price: '150 pontos', image: restaurantProducts.brownie, category: 'brownies' },
 ];
 
 function ProductCard({ id, name, price, image }) {
