@@ -16,10 +16,10 @@ const restaurantImages = {
 };
 
 const establishments = [
-  { id: 1, name: 'DiaDe', image: restaurantImages.diade },
-  { id: 2, name: 'AM/PM', image: restaurantImages.ampm },
-  { id: 3, name: 'Differ', image: restaurantImages.differ },
-  { id: 4, name: 'Versa', image: restaurantImages.versa },
+  { id: 1, name: 'DiaDe', image: restaurantImages.diade, rating: 4.8, distance: '0.2 km' },
+  { id: 2, name: 'AM/PM', image: restaurantImages.ampm, rating: 4.2, distance: '0.5 km' },
+  { id: 3, name: 'Differ', image: restaurantImages.differ, rating: 4.6, distance: '0.8 km' },
+  { id: 4, name: 'Versa', image: restaurantImages.versa, rating: 4.4, distance: '1.2 km' },
 ];
 
 const services = [
@@ -36,13 +36,13 @@ const adBanners = [
 ];
 
 const nearbyStores = [
-  { id: 1, name: 'DiaDe', image: restaurantImages.diade },
-  { id: 2, name: 'AM/PM', image: restaurantImages.ampm },
-  { id: 3, name: 'Differ', image: restaurantImages.differ },
-  { id: 4, name: 'Versa', image: restaurantImages.versa },
+  { id: 1, name: 'DiaDe', image: restaurantImages.diade, rating: 4.8, distance: '0.2 km' },
+  { id: 2, name: 'AM/PM', image: restaurantImages.ampm, rating: 4.2, distance: '0.5 km' },
+  { id: 3, name: 'Differ', image: restaurantImages.differ, rating: 4.6, distance: '0.8 km' },
+  { id: 4, name: 'Versa', image: restaurantImages.versa, rating: 4.4, distance: '1.2 km' },
 ];
 
-function EstablishmentCard({ name, image }) {
+function EstablishmentCard({ name, image, rating, distance }) {
   const handlePress = () => {
     if (name === 'DiaDe') {
       router.push('/loja');
@@ -55,6 +55,14 @@ function EstablishmentCard({ name, image }) {
         <Image source={image} style={styles.establishmentImage} resizeMode="cover" />
       </View>
       <Text style={styles.establishmentName}>{name}</Text>
+      <View style={styles.establishmentInfo}>
+        <View style={styles.ratingContainer}>
+          <Ionicons name="star" size={10} color="#FFD700" />
+          <Text style={styles.ratingText}>{rating}</Text>
+        </View>
+        <Text style={styles.pipelineText}>|</Text>
+        <Text style={styles.distanceText}>{distance}</Text>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -111,24 +119,24 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
           <View style={styles.headerContent}>
-            <View style={styles.logoContainer}>
-              <Image 
-                source={require('@/assets/images/pontuei logo.svg')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-            </View>
-          </View>
-          
+            
           <View style={styles.welcomeContainer}>
             <Image 
-              source={require('@/assets/images/icon.jpg')}
+              source={require('@/assets/images/pontuei logo.svg')}
               style={styles.profileImage}
             />
             <View style={styles.welcomeTexts}>
               <Text style={styles.welcomeText}>Bem vindo de volta.</Text>
               <Text style={styles.userName}>Eric Bauer!</Text>
             </View>
+            {/* <View style={styles.logoContainer}>
+              <Image 
+                source={require('@/assets/images/pontuei logo.svg')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View> */}
+          </View>
           </View>
 
         {/* Search Bar */}
@@ -148,7 +156,7 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Últimos estabelecimentos visitados</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.establishmentsScroll}>
           {establishments.map((item) => (
-            <EstablishmentCard key={item.id} name={item.name} image={item.image} />
+            <EstablishmentCard key={item.id} name={item.name} image={item.image} rating={item.rating} distance={item.distance} />
           ))}
         </ScrollView>
 
@@ -172,7 +180,7 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Lojas próximas de você</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.establishmentsScroll}>
           {nearbyStores.map((item) => (
-            <EstablishmentCard key={item.id} name={item.name} image={item.image} />
+            <EstablishmentCard key={item.id} name={item.name} image={item.image} rating={item.rating} distance={item.distance} />
           ))}
         </ScrollView>
       </ScrollView>
@@ -189,22 +197,20 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   headerContent: {
-    flexDirection: 'row',
+
     justifyContent: 'center',
     alignItems: 'center',
-    height: '15vh',
-    marginBottom: 20,
+    height: '10vh',
+    paddingTop: 20,
+    marginTop: 10,
     
   },
   logoContainer: {
-    justifyContent: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
   },
   logo: {
-    width: 60,
-    height: 60,
+    paddingTop: 10,
+    width: 120,
+    height: 120,
   
   },
   pontueiText: {
@@ -216,7 +222,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginLeft: 15,
   },
   profileImage: {
     width: 50,
@@ -277,8 +282,8 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   establishmentCard: {
-    width: isTablet ? 120 : 85,
-    height: isTablet ? 130 : 110,
+    width: isTablet ? 140 : 100,
+    height: isTablet ? 150 : 130,
     backgroundColor: '#fff',
     borderRadius: 10,
     marginRight: 16,
@@ -301,6 +306,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
+    alignSelf: 'center',
   },
   establishmentImage: {
     width: isTablet ? 55 : 45,
@@ -311,8 +317,38 @@ const styles = StyleSheet.create({
     fontSize: isTablet ? 14 : 12,
     color: '#333',
     textAlign: 'center',
+    fontFamily: 'Poppins_600SemiBold',
+    fontWeight: 'bold',
+    marginBottom: 4,
+    alignSelf: 'stretch',
+  },
+  establishmentInfo: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    paddingHorizontal: 8,
+    gap: 6,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  ratingText: {
+    fontSize: 10,
+    color: '#333',
     fontFamily: 'Poppins_400Regular',
-    fontWeight: '500',
+  },
+  distanceText: {
+    fontSize: 9,
+    color: '#666',
+    fontFamily: 'Poppins_400Regular',
+  },
+  pipelineText: {
+    fontSize: 10,
+    color: '#ccc',
+    fontFamily: 'Poppins_400Regular',
   },
   adCarousel: {
     marginBottom: 32,

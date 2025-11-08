@@ -1,10 +1,9 @@
 import { Poppins_400Regular, Poppins_600SemiBold, useFonts } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Stack } from 'expo-router';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCart } from '../../contexts/CartContext';
+import { useCart } from '../contexts/CartContext';
 import { useState, useRef } from 'react';
 import { Dimensions } from 'react-native';
 
@@ -55,11 +54,9 @@ const pointsProducts = [
   { id: 7, name: 'Brownie', price: '150 pts', image: restaurantProducts.brownie, category: 'brownies' },
 ];
 
-function ProductCard({ id, name, price, image }) {
-  const { addItem } = useCart();
-  
+function ProductCard({ id, name, price, image, onAddToCart }) {
   const handleAddToCart = () => {
-    addItem({ id, name, price });
+    onAddToCart({ id, name, price });
   };
 
   return (
@@ -77,8 +74,6 @@ function ProductCard({ id, name, price, image }) {
 }
 
 export default function LojaScreen() {
-  const [toastVisible, setToastVisible] = useState(false);
-  const [toastItem, setToastItem] = useState(null);
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_600SemiBold,
@@ -87,6 +82,8 @@ export default function LojaScreen() {
   const [activeTab, setActiveTab] = useState('destaque');
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const [activeFilter, setActiveFilter] = useState('cookies');
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastItem, setToastItem] = useState(null);
   
   const scrollViewRef = useRef(null);
   const cookiesRef = useRef(null);
@@ -102,7 +99,6 @@ export default function LojaScreen() {
   const handleScroll = (event) => {
     const currentScrollY = event.nativeEvent.contentOffset.y;
     
-    // Mostrar header compacto quando ultrapassar o nome do restaurante (280px)
     if (currentScrollY > 280) {
       setIsHeaderVisible(true);
     } else {
@@ -125,28 +121,24 @@ export default function LojaScreen() {
     });
   };
 
-  if (!fontsLoaded) {
-    return null;
-  }
-
   const showToast = (item) => {
     setToastItem(item);
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 3000);
   };
 
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
-    <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={styles.container}>
-      {/* Always Visible Back Button */}
+    <SafeAreaView style={styles.container}>
       <View style={styles.backButton}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={PRIMARY_COLOR} />
         </TouchableOpacity>
       </View>
       
-      {/* Floating Header */}
       {isHeaderVisible && (
         <View style={styles.floatingHeader}>
           <View style={styles.floatingHeaderContent}>
@@ -169,7 +161,6 @@ export default function LojaScreen() {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        {/* Store Header */}
         <View style={styles.storeHeader}>
           <Image source={restaurantImages.diade.diade_header} style={styles.storeHeaderImage} />
           <View style={styles.logoContainer}>
@@ -192,7 +183,6 @@ export default function LojaScreen() {
           </View>
         </View>
 
-        {/* User Points Section */}
         <View style={styles.pointsSection}>
           <View style={styles.pointsRow}>
             <Ionicons name="diamond" size={16} color="#E94057" />
@@ -203,9 +193,7 @@ export default function LojaScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Products Section */}
         <View style={styles.productsSection}>
-          {/* Tabs */}
           <View style={styles.tabsContainer}>
             <TouchableOpacity 
               style={[styles.separateTab, activeTab === 'destaque' && styles.activeSeparateTab]}
@@ -221,7 +209,6 @@ export default function LojaScreen() {
             </TouchableOpacity>
           </View>
           
-          {/* Filters */}
           <ScrollView 
             horizontal 
             showsHorizontalScrollIndicator={false} 
@@ -241,9 +228,7 @@ export default function LojaScreen() {
             ))}
           </ScrollView>
           
-          {/* Products by Category */}
           <View style={styles.categoriesContainer}>
-            {/* Cookies Section */}
             <View ref={cookiesRef} style={styles.categorySection}>
               <Text style={styles.categoryTitle}>Cookies</Text>
               <View style={styles.productsGrid}>
@@ -255,7 +240,6 @@ export default function LojaScreen() {
               </View>
             </View>
             
-            {/* Bebidas Section */}
             <View ref={bebidasRef} style={styles.categorySection}>
               <Text style={styles.categoryTitle}>Bebidas</Text>
               <View style={styles.productsGrid}>
@@ -267,7 +251,6 @@ export default function LojaScreen() {
               </View>
             </View>
             
-            {/* Brownies Section */}
             <View ref={browniesRef} style={styles.categorySection}>
               <Text style={styles.categoryTitle}>Brownies</Text>
               <View style={styles.productsGrid}>
@@ -282,7 +265,6 @@ export default function LojaScreen() {
         </View>
       </ScrollView>
       
-      {/* Toast */}
       {toastVisible && toastItem && (
         <View style={styles.toast}>
           <View style={styles.toastContent}>
@@ -292,35 +274,32 @@ export default function LojaScreen() {
         </View>
       )}
     </SafeAreaView>
-    </>
   );
 }
+
+const { width } = Dimensions.get('window');
+const isLargeScreen = width > 425;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
   },
   backButton: {
     position: 'absolute',
     top: 50,
     left: 20,
-    zIndex: 3,
-    backgroundColor: '#fff',
+    zIndex: 1000,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 20,
     padding: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   floatingHeader: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 2,
+    zIndex: 999,
     backgroundColor: '#fff',
     paddingTop: 50,
     paddingBottom: 15,
@@ -449,7 +428,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   productsSection: {
-    paddingHorizontal: 20,
+    flex: 1,
   },
   tabsContainer: {
     flexDirection: 'row',
@@ -489,28 +468,29 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   filtersContent: {
-    paddingHorizontal: 5,
+    paddingHorizontal: 20,
+    gap: 10,
   },
   filterButton: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
-    marginHorizontal: 5,
   },
   activeFilterButton: {
     backgroundColor: PRIMARY_COLOR,
   },
   filterText: {
-    fontSize: 12,
-    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
     color: '#666',
   },
   activeFilterText: {
     color: '#fff',
+    fontFamily: 'Poppins_600SemiBold',
   },
   categoriesContainer: {
-    paddingHorizontal: 0,
+    paddingHorizontal: 20,
   },
   categorySection: {
     marginBottom: 30,
@@ -566,7 +546,7 @@ const styles = StyleSheet.create({
   },
   toast: {
     position: 'absolute',
-    bottom: 100,
+    bottom: 50,
     left: 20,
     right: 20,
     backgroundColor: PRIMARY_COLOR,
