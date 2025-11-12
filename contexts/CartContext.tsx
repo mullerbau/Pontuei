@@ -13,16 +13,13 @@ interface CartContextType {
   removeItem: (id: number) => void;
   clearCart: () => void;
   itemCount: number;
-  showCart: () => void;
-  setShowCartModal: (show: boolean) => void;
-  showCartModal: boolean;
+  getTotalPrice: () => string;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [showCartModal, setShowCartModal] = useState(false);
 
   const addItem = (newItem: Omit<CartItem, 'quantity'>) => {
     setItems(prev => {
@@ -40,9 +37,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const showCart = () => {
-    setShowCartModal(true);
-  };
+
 
   const removeItem = (id: number) => {
     setItems(prev => prev.filter(item => item.id !== id));
@@ -52,8 +47,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems([]);
   };
 
+  const getTotalPrice = () => {
+    const total = items.reduce((sum, item) => {
+      const priceStr = item.price.replace('R$ ', '').replace(',', '.');
+      const price = parseFloat(priceStr);
+      if (isNaN(price)) return sum;
+      return sum + (price * item.quantity);
+    }, 0);
+    return `R$ ${total.toFixed(2).replace('.', ',')}`;
+  };
+
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, clearCart, itemCount, showCart, setShowCartModal, showCartModal }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, clearCart, itemCount, getTotalPrice }}>
       {children}
     </CartContext.Provider>
   );

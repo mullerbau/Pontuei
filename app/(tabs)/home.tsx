@@ -61,7 +61,7 @@ function EstablishmentCard({ name, image, rating, distance }) {
           <Text style={styles.ratingText}>{rating}</Text>
         </View>
         <Text style={styles.pipelineText}>|</Text>
-        <Text style={styles.distanceText}>{distance}</Text>
+        <Text style={styles.distanceText} numberOfLines={1}>{distance}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   establishmentCard: {
-    width: isTablet ? 140 : 100,
+    width: isTablet ? 140 : 110,
     height: isTablet ? 150 : 130,
     backgroundColor: '#fff',
     borderRadius: 10,
@@ -327,8 +327,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'stretch',
-    paddingHorizontal: 8,
-    gap: 6,
+    paddingHorizontal: 4,
+    gap: 8,
   },
   ratingContainer: {
     flexDirection: 'row',

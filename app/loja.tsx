@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCart } from '../contexts/CartContext';
 import { useState, useRef } from 'react';
 import { Dimensions } from 'react-native';
+import ProductModal from '../components/ProductModal';
 
 const PRIMARY_COLOR = '#E94057';
 
@@ -54,21 +55,14 @@ const pointsProducts = [
   { id: 7, name: 'Brownie', price: '150 pts', image: restaurantProducts.brownie, category: 'brownies' },
 ];
 
-function ProductCard({ id, name, price, image, onAddToCart }) {
-  const handleAddToCart = () => {
-    onAddToCart({ id, name, price });
-  };
-
+function ProductCard({ id, name, price, image, onPress }) {
   return (
-    <TouchableOpacity style={styles.productCard}>
+    <TouchableOpacity style={styles.productCard} onPress={() => onPress({ id, name, price, image })}>
       <Image source={image} style={styles.productImage} />
       <View style={styles.productInfo}>
         <Text style={styles.productName}>{name}</Text>
         <Text style={styles.productPrice}>{price}</Text>
       </View>
-      <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
-        <Ionicons name="add" size={20} color="#fff" />
-      </TouchableOpacity>
     </TouchableOpacity>
   );
 }
@@ -82,8 +76,10 @@ export default function LojaScreen() {
   const [activeTab, setActiveTab] = useState('destaque');
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const [activeFilter, setActiveFilter] = useState('cookies');
-  const [toastVisible, setToastVisible] = useState(false);
-  const [toastItem, setToastItem] = useState(null);
+  const { items, getTotalPrice, clearCart } = useCart();
+  const [showExitAlert, setShowExitAlert] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showProductModal, setShowProductModal] = useState(false);
   
   const scrollViewRef = useRef(null);
   const cookiesRef = useRef(null);
@@ -121,10 +117,27 @@ export default function LojaScreen() {
     });
   };
 
-  const showToast = (item) => {
-    setToastItem(item);
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 3000);
+  const handleBackPress = () => {
+    if (items.length > 0) {
+      setShowExitAlert(true);
+    } else {
+      router.back();
+    }
+  };
+
+  const confirmExit = () => {
+    clearCart();
+    router.back();
+  };
+
+  const handleProductPress = (product) => {
+    setSelectedProduct(product);
+    setShowProductModal(true);
+  };
+
+  const closeProductModal = () => {
+    setShowProductModal(false);
+    setSelectedProduct(null);
   };
 
   if (!fontsLoaded) {
@@ -134,7 +147,7 @@ export default function LojaScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.backButton}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={handleBackPress}>
           <Ionicons name="arrow-back" size={24} color={PRIMARY_COLOR} />
         </TouchableOpacity>
       </View>
@@ -142,7 +155,7 @@ export default function LojaScreen() {
       {isHeaderVisible && (
         <View style={styles.floatingHeader}>
           <View style={styles.floatingHeaderContent}>
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity onPress={handleBackPress}>
               <Ionicons name="arrow-back" size={24} color={PRIMARY_COLOR} />
             </TouchableOpacity>
             <Text style={styles.floatingStoreName}>DiaDe</Text>
@@ -235,7 +248,7 @@ export default function LojaScreen() {
                 {(activeTab === 'destaque' ? products : pointsProducts)
                   .filter(product => product.category === 'cookies')
                   .map((product) => (
-                    <ProductCard key={product.id} {...product} onAddToCart={showToast} />
+                    <ProductCard key={product.id} {...product} onPress={handleProductPress} />
                   ))}
               </View>
             </View>
@@ -246,7 +259,7 @@ export default function LojaScreen() {
                 {(activeTab === 'destaque' ? products : pointsProducts)
                   .filter(product => product.category === 'bebidas')
                   .map((product) => (
-                    <ProductCard key={product.id} {...product} onAddToCart={showToast} />
+                    <ProductCard key={product.id} {...product} onPress={handleProductPress} />
                   ))}
               </View>
             </View>
@@ -257,7 +270,7 @@ export default function LojaScreen() {
                 {(activeTab === 'destaque' ? products : pointsProducts)
                   .filter(product => product.category === 'brownies')
                   .map((product) => (
-                    <ProductCard key={product.id} {...product} onAddToCart={showToast} />
+                    <ProductCard key={product.id} {...product} onPress={handleProductPress} />
                   ))}
               </View>
             </View>
@@ -265,14 +278,42 @@ export default function LojaScreen() {
         </View>
       </ScrollView>
       
-      {toastVisible && toastItem && (
-        <View style={styles.toast}>
-          <View style={styles.toastContent}>
-            <Text style={styles.toastText}>{toastItem.name} adicionado ao carrinho</Text>
-            <Text style={styles.toastPrice}>{toastItem.price}</Text>
+      {/* Cart Bottom Menu */}
+      {items.length > 0 && (
+        <View style={styles.cartBottomMenu}>
+          <View style={styles.cartInfo}>
+            <Text style={styles.cartItemCount}>{items.length} {items.length === 1 ? 'item' : 'itens'}</Text>
+            <Text style={styles.cartTotal}>Total: {getTotalPrice()}</Text>
+          </View>
+          <TouchableOpacity style={styles.checkoutButton} onPress={() => router.push('/finalizacao-pedido')}>
+            <Text style={styles.checkoutButtonText}>Finalizar Pedido</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      
+      {/* Exit Confirmation Modal */}
+      {showExitAlert && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.alertModal}>
+            <Text style={styles.alertTitle}>Sair da compra?</Text>
+            <Text style={styles.alertMessage}>Certeza que quer sair da sua compra atual? Se voltar ao menu sua compra será desfeita.</Text>
+            <View style={styles.alertButtons}>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setShowExitAlert(false)}>
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.confirmButton} onPress={confirmExit}>
+                <Text style={styles.confirmButtonText}>Sair</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       )}
+      
+      <ProductModal 
+        visible={showProductModal}
+        product={selectedProduct}
+        onClose={closeProductModal}
+      />
     </SafeAreaView>
   );
 }
@@ -536,40 +577,103 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_400Regular',
     color: PRIMARY_COLOR,
   },
-  addButton: {
-    backgroundColor: PRIMARY_COLOR,
-    width: 35,
-    height: 35,
-    borderRadius: 17,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  toast: {
+
+  cartBottomMenu: {
     position: 'absolute',
-    bottom: 50,
-    left: 20,
-    right: 20,
-    backgroundColor: PRIMARY_COLOR,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastContent: {
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    padding: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  toastText: {
+  cartInfo: {
+    flex: 1,
+  },
+  cartItemCount: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: '#666',
+  },
+  cartTotal: {
+    fontSize: 16,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#333',
+  },
+  checkoutButton: {
+    backgroundColor: PRIMARY_COLOR,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 25,
+  },
+  checkoutButtonText: {
     fontSize: 14,
     fontFamily: 'Poppins_600SemiBold',
     color: '#fff',
-    flex: 1,
   },
-  toastPrice: {
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  alertModal: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    marginHorizontal: 20,
+    maxWidth: 300,
+  },
+  alertTitle: {
+    fontSize: 18,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  alertMessage: {
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  alertButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#666',
+  },
+  confirmButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: PRIMARY_COLOR,
+    alignItems: 'center',
+  },
+  confirmButtonText: {
     fontSize: 14,
     fontFamily: 'Poppins_600SemiBold',
     color: '#fff',

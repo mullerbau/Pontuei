@@ -4,11 +4,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCart } from '../contexts/CartContext';
+import { useOrders } from '../contexts/OrderContext';
 
 export default function FinalizacaoPedido() {
-  const { items, total, clearCart } = useCart();
+  const { items, clearCart } = useCart();
+  const { addOrder } = useOrders();
   const [paymentMethod, setPaymentMethod] = useState('');
   const [deliveryMethod, setDeliveryMethod] = useState('');
+
+  const total = items.reduce((sum, item) => {
+    const priceStr = item.price.replace('R$ ', '').replace(',', '.');
+    const price = parseFloat(priceStr);
+    if (isNaN(price)) return sum;
+    return sum + (price * item.quantity);
+  }, 0);
+
+  const formatTotal = (value: number) => {
+    if (isNaN(value) || !isFinite(value)) return '0,00';
+    return value.toFixed(2).replace('.', ',');
+  };
 
   const handleFinalizarPedido = () => {
     if (!paymentMethod || !deliveryMethod) {
@@ -16,19 +30,17 @@ export default function FinalizacaoPedido() {
       return;
     }
 
-    Alert.alert(
-      'Pedido Confirmado!',
-      'Seu pedido foi realizado com sucesso.',
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            clearCart();
-            router.push('/home');
-          }
-        }
-      ]
-    );
+    // Criar o pedido
+    addOrder({
+      items,
+      total: `R$ ${formatTotal(total)}`,
+      status: 'em_preparo',
+      paymentMethod,
+      deliveryMethod,
+    });
+
+    clearCart();
+    router.push('/pedido-sucesso');
   };
 
   return (
@@ -48,11 +60,17 @@ export default function FinalizacaoPedido() {
             <View key={item.id} style={styles.orderItem}>
               <Text style={styles.itemName}>{item.name}</Text>
               <Text style={styles.itemQuantity}>Qtd: {item.quantity}</Text>
-              <Text style={styles.itemPrice}>R$ {(item.price * item.quantity).toFixed(2)}</Text>
+              <Text style={styles.itemPrice}>R$ {(() => {
+                const priceStr = item.price.replace('R$ ', '').replace(',', '.');
+                const price = parseFloat(priceStr);
+                if (isNaN(price)) return '0,00';
+                const itemTotal = price * item.quantity;
+                return isNaN(itemTotal) ? '0,00' : itemTotal.toFixed(2).replace('.', ',');
+              })()}</Text>
             </View>
           ))}
           <View style={styles.totalContainer}>
-            <Text style={styles.totalText}>Total: R$ {total.toFixed(2)}</Text>
+            <Text style={styles.totalText}>Total: R$ {formatTotal(total)}</Text>
           </View>
         </View>
 
@@ -66,15 +84,6 @@ export default function FinalizacaoPedido() {
             <Ionicons name="storefront" size={20} color={deliveryMethod === 'retirada' ? '#fff' : '#E94057'} />
             <Text style={[styles.optionText, deliveryMethod === 'retirada' && styles.selectedText]}>
               Retirar no Local
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.option, deliveryMethod === 'delivery' && styles.selectedOption]}
-            onPress={() => setDeliveryMethod('delivery')}
-          >
-            <Ionicons name="bicycle" size={20} color={deliveryMethod === 'delivery' ? '#fff' : '#E94057'} />
-            <Text style={[styles.optionText, deliveryMethod === 'delivery' && styles.selectedText]}>
-              Delivery
             </Text>
           </TouchableOpacity>
         </View>
