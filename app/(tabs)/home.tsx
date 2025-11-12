@@ -1,9 +1,9 @@
 import { Poppins_400Regular, Poppins_600SemiBold, useFonts } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Dimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 const isTablet = width > 425;
@@ -23,16 +23,23 @@ const establishments = [
 ];
 
 const services = [
-  { id: 1, name: 'Barbearias', description: 'Agende seu corte pelo App!', icon: '' },
-  { id: 2, name: 'Manicure', description: 'Faça suas unhas lindondass', icon: '' },
-  { id: 3, name: 'Pedicure', description: 'Faça seu pézin feioso', icon: '' },
-  { id: 4, name: 'Cafeterias', description: 'Aproveite um café quentinho', icon: '' },
+  { id: 1, name: 'Barbearias', description: 'Agende seu corte pelo App!', icon: 'cut' },
+  { id: 2, name: 'Manicure', description: 'Faça suas unhas lindondass', icon: 'hand-left' },
+  { id: 3, name: 'Pedicure', description: 'Faça seu pézin feioso', icon: 'footsteps' },
+  { id: 4, name: 'Cafeterias', description: 'Aproveite um café quentinho', icon: 'cafe' },
 ];
 
 const adBanners = [
   { id: 1, text: ' APROVEITA A PROMOÇÃO LOCK', colors: ['#ff3366', '#ff5e5e'] },
   { id: 2, text: ' Promoções Especiais', colors: ['#ff3366', '#ff5e5e'] },
   { id: 3, text: ' Pontos em Dobro', colors: ['#ff3366', '#ff5e5e'] },
+];
+
+const featuredStores = [
+  { id: 1, name: 'DiaDe', image: restaurantImages.diade, rating: 4.8, distance: '0.2 km', specialty: 'Lanches e Bebidas' },
+  { id: 2, name: 'AM/PM', image: restaurantImages.ampm, rating: 4.2, distance: '0.5 km', specialty: 'Conveniência 24h' },
+  { id: 3, name: 'Differ', image: restaurantImages.differ, rating: 4.6, distance: '0.8 km', specialty: 'Restaurante Gourmet' },
+  { id: 4, name: 'Versa', image: restaurantImages.versa, rating: 4.4, distance: '1.2 km', specialty: 'Café e Doces' },
 ];
 
 const nearbyStores = [
@@ -74,10 +81,31 @@ function ServiceCard({ name, description, icon }) {
         colors={['#ff3366', '#ff5e5e']}
         style={styles.serviceLogo}
       >
-        <Text style={styles.serviceIcon}>{icon}</Text>
+        <Ionicons name={icon} size={24} color="#fff" />
       </LinearGradient>
       <Text style={styles.serviceName}>{name}</Text>
       <Text style={styles.serviceDescription}>{description}</Text>
+    </TouchableOpacity>
+  );
+}
+
+function FeaturedCard({ name, image, rating, distance, specialty }) {
+  return (
+    <TouchableOpacity style={styles.featuredCard}>
+      <View style={styles.featuredImageContainer}>
+        <Image source={image} style={styles.featuredImage} resizeMode="cover" />
+      </View>
+      <View style={styles.featuredContent}>
+        <Text style={styles.featuredName}>{name}</Text>
+        <Text style={styles.featuredSpecialty}>{specialty}</Text>
+        <View style={styles.featuredInfo}>
+          <View style={styles.featuredRating}>
+            <Ionicons name="star" size={12} color="#FFD700" />
+            <Text style={styles.featuredRatingText}>{rating}</Text>
+          </View>
+          <Text style={styles.featuredDistance}>{distance}</Text>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -162,6 +190,21 @@ export default function HomeScreen() {
 
         {/* Ad Banner Carousel */}
         <AdBannerCarousel />
+
+        {/* Featured Section */}
+        <Text style={styles.sectionTitle}>Destaques</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.featuredScroll}>
+          {featuredStores.map((item) => (
+            <FeaturedCard
+              key={item.id}
+              name={item.name}
+              image={item.image}
+              rating={item.rating}
+              distance={item.distance}
+              specialty={item.specialty}
+            />
+          ))}
+        </ScrollView>
 
         {/* Services Section */}
         <Text style={styles.sectionTitle}>Serviços</Text>
@@ -429,5 +472,72 @@ const styles = StyleSheet.create({
     color: '#666',
     fontFamily: 'Poppins_400Regular',
     textAlign: 'center',
+  },
+  featuredScroll: {
+    paddingLeft: 20,
+    marginBottom: 32,
+  },
+  featuredCard: {
+    width: width * 0.85,
+    height: 100,
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    marginRight: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  featuredImageContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: 'hidden',
+    marginRight: 16,
+  },
+  featuredImage: {
+    width: 60,
+    height: 60,
+  },
+  featuredContent: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  featuredName: {
+    fontSize: 18,
+    color: '#333',
+    fontFamily: 'Poppins_600SemiBold',
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  featuredSpecialty: {
+    fontSize: 14,
+    color: '#666',
+    fontFamily: 'Poppins_400Regular',
+    marginBottom: 8,
+  },
+  featuredInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  featuredRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  featuredRatingText: {
+    fontSize: 12,
+    color: '#333',
+    fontFamily: 'Poppins_400Regular',
+  },
+  featuredDistance: {
+    fontSize: 12,
+    color: '#666',
+    fontFamily: 'Poppins_400Regular',
   },
 });
