@@ -1,3 +1,4 @@
+// BACKUP DO LOGIN MELHORADO - APLICAR APÓS PULL DA DEV
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar, ScrollView, Alert, ActivityIndicator, Animated } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from "expo-router";
