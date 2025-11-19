@@ -27,14 +27,20 @@ export default function TelaLogin() {
     setCarregando(true);
     
     try {
-      // Login de demonstração
+      // TODO: INTEGRAÇÃO BACK-END
+      // Substituir por: const response = await AuthService.login({ email, password: senha });
+      // Response esperado: { token, user: { id, name, email, points, avatar } }
+      
+      // Login de demonstração (REMOVER QUANDO INTEGRAR)
       if (email === "joao@pontuei.com" && senha === "123456") {
+        // TODO: Salvar token real: await AsyncStorage.setItem('auth_token', response.token);
+        // TODO: Salvar dados do usuário: await AsyncStorage.setItem('user_data', JSON.stringify(response.user));
         setCarregando(false);
         navegacao.replace("/(tabs)");
         return;
       }
       
-      // Simulação temporária com AsyncStorage
+      // Simulação temporária com AsyncStorage (REMOVER QUANDO INTEGRAR)
       const usuario = await AsyncStorage.getItem("usuario");
       if (usuario) {
         const dados = JSON.parse(usuario);
@@ -51,6 +57,7 @@ export default function TelaLogin() {
       }
     } catch (error) {
       console.error('Erro no login:', error);
+      // TODO: Tratar erros específicos da API (401, 422, 500, etc.)
       Alert.alert("Erro", "Falha na conexão. Tente novamente.");
       setCarregando(false);
     }

@@ -15,6 +15,8 @@ const restaurantImages = {
   versa: require('@/assets/images/logo-restaurantes/versa.jpg'),
 };
 
+// TODO: INTEGRAÇÃO BACK-END - Substituir por dados da API
+// API: GET /establishments -> [{ id, name, image, rating, distance }]
 const establishments = [
   { id: 1, name: 'DiaDe', image: restaurantImages.diade, rating: 4.8, distance: '0.2 km' },
   { id: 2, name: 'AM/PM', image: restaurantImages.ampm, rating: 4.2, distance: '0.5 km' },
@@ -42,6 +44,8 @@ const featuredStores = [
   { id: 4, name: 'Versa', image: restaurantImages.versa, rating: 4.4, distance: '1.2 km', specialty: 'Café e Doces' },
 ];
 
+// TODO: INTEGRAÇÃO BACK-END - Lojas próximas baseadas na localização
+// API: GET /establishments/nearby?lat={lat}&lng={lng}&radius={radius}
 const nearbyStores = [
   { id: 1, name: 'DiaDe', image: restaurantImages.diade, rating: 4.8, distance: '0.2 km' },
   { id: 2, name: 'AM/PM', image: restaurantImages.ampm, rating: 4.2, distance: '0.5 km' },
@@ -155,7 +159,8 @@ export default function HomeScreen() {
             />
             <View style={styles.welcomeTexts}>
               <Text style={styles.welcomeText}>Bem vindo de volta.</Text>
-              <Text style={styles.userName}>Eric Bauer!</Text>
+              {/* TODO: INTEGRAÇÃO BACK-END - Nome dinâmico do usuário */}
+            <Text style={styles.userName}>Eric Bauer!</Text> {/* {userData?.name}! */}
             </View>
             {/* <View style={styles.logoContainer}>
               <Image 

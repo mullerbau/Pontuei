@@ -60,6 +60,11 @@ export default function TelaCadastro() {
     animar();
     setCarregando(true);
     try {
+      // TODO: INTEGRAÇÃO BACK-END
+      // Substituir por: const response = await AuthService.register({ name: nome, cpf, email, password: senha });
+      // Response esperado: { message, user: { id, name, email } }
+      
+      // Simulação temporária com AsyncStorage (REMOVER QUANDO INTEGRAR)
       await AsyncStorage.setItem("usuario", JSON.stringify({
         nome,
         cpf: cpf.replace(/\D/g, ''),
@@ -67,9 +72,14 @@ export default function TelaCadastro() {
         senha: CryptoJS.SHA256(senha).toString(),
         dataCadastro: new Date().toISOString()
       }));
+      
       setCarregando(false);
-      navegacao.replace("/auth/login");
-    } catch {
+      // TODO: Mostrar mensagem de sucesso da API
+      Alert.alert("Sucesso", "Conta criada com sucesso!", [
+        { text: "OK", onPress: () => navegacao.replace("/auth/login") }
+      ]);
+    } catch (error) {
+      // TODO: Tratar erros específicos da API (email já existe, CPF inválido, etc.)
       Alert.alert("Erro", "Falha ao cadastrar. Tente novamente.");
       setCarregando(false);
     }

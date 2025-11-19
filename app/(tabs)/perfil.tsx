@@ -5,6 +5,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// TODO: INTEGRAÇÃO BACK-END - Substituir por dados da API
+// API: GET /user/favorite-stores -> [{ storeId, storeName, points, icon }]
 const pontosLojas = [
   { nome: "Café Central", pontos: 450, icone: "cafe", cor: "#FF6B35" },
   { nome: "Barbearia Style", pontos: 320, icone: "cut", cor: "#4ECDC4" },
@@ -39,8 +41,9 @@ export default function TelaPerfil() {
         <View style={s.avatar}>
           <Image source={require('../../assets/images/icon.jpg')} style={s.avatarImage} />
         </View>
-        <Text style={s.name}>Eric Bauer</Text>
-        <Text style={s.email}>eric@pontuei.com</Text>
+        {/* TODO: INTEGRAÇÃO BACK-END - Dados dinâmicos do usuário */}
+        <Text style={s.name}>Eric Bauer</Text> {/* {userData?.name} */}
+        <Text style={s.email}>eric@pontuei.com</Text> {/* {userData?.email} */}
       </LinearGradient>
 
       {/* Seção de pontos */}
@@ -49,7 +52,8 @@ export default function TelaPerfil() {
         <View style={s.pointsCard}>
           <View style={s.pointsRow}>
             <Ionicons name="diamond" size={20} color="#ff3366" />
-            <Text style={s.totalPoints}>1.200</Text>
+            {/* TODO: INTEGRAÇÃO BACK-END - Pontos dinâmicos */}
+            <Text style={s.totalPoints}>1.200</Text> {/* {userPoints} */}
           </View>
           <Text style={s.pointsLabel}>pontos acumulados</Text>
         </View>

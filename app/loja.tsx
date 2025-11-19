@@ -35,6 +35,8 @@ const restaurantProducts = {
   chocolateNozesCookie: require('@/assets/images/diade-images/chocolate e nozes cookie.jpeg'),
 }; 
 
+// TODO: INTEGRAÇÃO BACK-END - Produtos do estabelecimento
+// API: GET /establishments/{id}/products -> [{ id, name, price, pointsPrice, image, category }]
 const products = [
   { id: 1, name: 'Red Velvet Cookie', price: 'R$ 7,95', image: restaurantProducts.redVeltetCookie, category: 'cookies' },
   { id: 2, name: 'Capuccino Cookie', price: 'R$ 7,95', image: restaurantProducts.capuccinoCookie, category: 'cookies' },
@@ -199,7 +201,9 @@ export default function LojaScreen() {
         <View style={styles.pointsSection}>
           <View style={styles.pointsRow}>
             <Ionicons name="diamond" size={16} color="#E94057" />
-            <Text style={styles.pointsText}>Você tem <Text style={styles.pointsValue}>1.250 pontos</Text></Text>
+            {/* TODO: INTEGRAÇÃO BACK-END - Pontos dinâmicos do usuário */}
+        <Text style={styles.pointsText}>Você tem <Text style={styles.pointsValue}>1.250 pontos</Text></Text>
+        {/* <Text style={styles.pointsText}>Você tem <Text style={styles.pointsValue}>{userPoints} pontos</Text></Text> */}
           </View>
           <TouchableOpacity style={styles.pointsLinkContainer}>
             <Text style={styles.pointsLink}>Ver histórico</Text>
