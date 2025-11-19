@@ -37,19 +37,24 @@ npm install axios @tanstack/react-query
 ### FASE 2: Criar Estrutura de Serviços
 ```
 services/
-├── api.ts              # Cliente HTTP base
-├── auth.service.ts     # Autenticação
+├── api.ts              # Cliente HTTP base (Axios + interceptors)
+├── auth.service.ts     # Autenticação (JWT)
 ├── user.service.ts     # Dados do usuário  
 ├── establishment.service.ts # Estabelecimentos
 └── order.service.ts    # Pedidos
 ```
 
+**Back-end NestJS:**
+- Base URL: `https://api.pontuei.com` (ou localhost:3000)
+- Autenticação: JWT Bearer tokens
+- Banco: Neon PostgreSQL com Prisma ORM
+
 ### FASE 3: Implementar por Prioridade
-1. **Autenticação** (login/cadastro)
-2. **Dados do usuário** (perfil/pontos)
-3. **Estabelecimentos** (lista/detalhes)
-4. **Produtos** (cardápio dinâmico)
-5. **Carrinho/Pedidos** (sincronização)
+1. **Autenticação** (POST /auth/login, /auth/register)
+2. **Dados do usuário** (GET /users/profile, /users/points)
+3. **Estabelecimentos** (GET /establishments, /establishments/nearby)
+4. **Produtos** (GET /establishments/:id/products)
+5. **Carrinho/Pedidos** (POST /orders, GET /orders)
 
 ---
 
@@ -94,15 +99,15 @@ const dadosEstaticos = []; // REMOVER QUANDO INTEGRAR
 
 ## 📊 STATUS ATUAL
 
-| Componente | Status | Próximo Passo |
-|------------|--------|---------------|
-| Login | ✅ Preparado | Integrar API |
-| Cadastro | ✅ Preparado | Integrar API |
-| Perfil | ✅ Preparado | Carregar dados dinâmicos |
-| Home | ✅ Preparado | Lista de estabelecimentos |
-| Loja | ✅ Preparado | Produtos dinâmicos |
-| Carrinho | ✅ Funcional | Sincronizar com API |
-| Pedidos | ✅ Funcional | Sincronizar com API |
+| Componente | Status | Endpoint NestJS | Próximo Passo |
+|------------|--------|-----------------|---------------|
+| Login | ✅ Preparado | POST /auth/login | Integrar JWT |
+| Cadastro | ✅ Preparado | POST /auth/register | Validar CPF/email |
+| Perfil | ✅ Preparado | GET /users/profile | Dados dinâmicos |
+| Home | ✅ Preparado | GET /establishments | Lista da API |
+| Loja | ✅ Preparado | GET /establishments/:id/products | Produtos dinâmicos |
+| Carrinho | ✅ Funcional | POST /orders | Sincronizar |
+| Pedidos | ✅ Funcional | GET /orders | Status real |
 
 ---
 

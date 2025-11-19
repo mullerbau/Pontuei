@@ -3,6 +3,13 @@
 ## 🎯 VISÃO GERAL
 Este documento mapeia todos os pontos onde o front-end atual (dados estáticos) deve ser integrado com APIs do back-end.
 
+## 🛠️ STACK DO BACK-END
+- **Framework:** NestJS (Node.js + TypeScript)
+- **Banco de Dados:** Neon PostgreSQL
+- **ORM:** Prisma ou TypeORM (recomendado)
+- **Autenticação:** JWT + Passport
+- **Validação:** class-validator + class-transformer
+
 ---
 
 ## 🔐 1. AUTENTICAÇÃO E USUÁRIOS
@@ -11,23 +18,27 @@ Este documento mapeia todos os pontos onde o front-end atual (dados estáticos) 
 **ATUAL:** AsyncStorage + validação local
 **NECESSÁRIO:**
 - **POST** `/auth/login`
-- **Body:** `{ email, password }`
-- **Response:** `{ token, user: { id, name, email, points, avatar } }`
+- **Body:** `{ email: string, password: string }`
+- **Response:** `{ access_token: string, user: UserDto }`
 - **Headers:** Authorization Bearer token para requests subsequentes
+- **NestJS:** AuthController + AuthService + JwtStrategy
 
 ### 1.2 Cadastro (`app/auth/Cadastro.tsx`)
 **ATUAL:** AsyncStorage local
 **NECESSÁRIO:**
 - **POST** `/auth/register`
-- **Body:** `{ name, cpf, email, password }`
-- **Response:** `{ message, user: { id, name, email } }`
+- **Body:** `{ name: string, cpf: string, email: string, password: string }`
+- **Response:** `{ message: string, user: UserDto }`
+- **Validações:** CPF único, email único, senha forte
+- **NestJS:** CreateUserDto + ValidationPipe
 
 ### 1.3 Perfil do Usuário (`app/(tabs)/perfil.tsx`)
 **ATUAL:** Dados fixos "Eric Bauer"
 **NECESSÁRIO:**
-- **GET** `/user/profile`
-- **Response:** `{ id, name, email, avatar, totalPoints, favoriteStores }`
-- **PUT** `/user/profile` (para atualizações)
+- **GET** `/users/profile` (autenticado)
+- **Response:** `UserProfileDto`
+- **PUT** `/users/profile` (para atualizações)
+- **PostgreSQL Tables:** users, user_points, user_favorite_stores
 
 ---
 
