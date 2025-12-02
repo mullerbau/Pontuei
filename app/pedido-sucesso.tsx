@@ -3,9 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useOrders } from '../contexts/OrderContext';
 
 export default function PedidoSucesso() {
   const [rating, setRating] = useState(0);
+  const { orders } = useOrders();
+  
+  // Pega o último pedido (mais recente)
+  const lastOrder = orders[0];
 
   const handleRating = (stars: number) => {
     setRating(stars);
@@ -29,7 +34,7 @@ export default function PedidoSucesso() {
         <Text style={styles.subtitle}>Seu pedido foi realizado com sucesso</Text>
         
         <View style={styles.orderInfo}>
-          <Text style={styles.orderNumber}>Pedido #1234</Text>
+          <Text style={styles.orderNumber}>Pedido #{lastOrder?.id.slice(-4).toUpperCase() || '1234'}</Text>
           <Text style={styles.orderStatus}>Em preparo</Text>
         </View>
 

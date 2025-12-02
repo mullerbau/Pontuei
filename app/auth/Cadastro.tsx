@@ -1,10 +1,10 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar, ScrollView, Alert, ActivityIndicator, Animated } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar, ScrollView, Alert, ActivityIndicator, Animated, Image } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useRef } from "react";
 import { Ionicons } from '@expo/vector-icons';
-import CryptoJS from 'crypto-js';
+import { ApiService } from '../../services/api';
 
 export default function TelaCadastro() {
   const navegacao = useRouter();
@@ -13,11 +13,7 @@ export default function TelaCadastro() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
-  const [erroNome, setErroNome] = useState("");
-  const [erroCpf, setErroCpf] = useState("");
-  const [erroEmail, setErroEmail] = useState("");
-  const [erroSenha, setErroSenha] = useState("");
-  const [erroConfirmarSenha, setErroConfirmarSenha] = useState("");
+
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
@@ -25,51 +21,73 @@ export default function TelaCadastro() {
 
   const animar = () => Animated.sequence([Animated.timing(animacaoBotao, {toValue: 0.95, duration: 100, useNativeDriver: true}), Animated.timing(animacaoBotao, {toValue: 1, duration: 100, useNativeDriver: true})]).start();
 
-  const validarCPF = (cpf: string) => {
-    const nums = cpf.replace(/\D/g, '');
-    if (nums.length !== 11 || /^(\d)\1{10}$/.test(nums)) return false;
-    let soma = 0;
-    for (let i = 0; i < 9; i++) soma += parseInt(nums[i]) * (10 - i);
-    let resto = (soma * 10) % 11;
-    if (resto === 10 || resto === 11) resto = 0;
-    if (resto !== parseInt(nums[9])) return false;
-    soma = 0;
-    for (let i = 0; i < 10; i++) soma += parseInt(nums[i]) * (11 - i);
-    resto = (soma * 10) % 11;
-    if (resto === 10 || resto === 11) resto = 0;
-    return resto === parseInt(nums[10]);
-  };
 
-  const formatarCPF = (valor: string) => {
-    const nums = valor.replace(/\D/g, '').slice(0, 11);
-    return nums.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  };
-
-  const validarSenha = (senha: string) => {
-    const temMaiuscula = /[A-Z]/.test(senha);
-    const temMinuscula = /[a-z]/.test(senha);
-    const temNumero = /\d/.test(senha);
-    const temEspecial = /[!@#$%^&*(),.?":{}|<>]/.test(senha);
-    return senha.length >= 8 && temMaiuscula && temMinuscula && temNumero && temEspecial;
-  };
 
   const fazerCadastro = async () => {
+    console.log('Iniciando cadastro...');
+    
     if (!nome.trim() || !cpf.trim() || !email.trim() || !senha.trim() || !confirmarSenha.trim()) {
       return Alert.alert("Erro", "Preencha todos os campos");
     }
+    
     animar();
     setCarregando(true);
+    
     try {
-      await AsyncStorage.setItem("usuario", JSON.stringify({
-        nome,
-        cpf: cpf.replace(/\D/g, ''),
-        email,
-        senha: CryptoJS.SHA256(senha).toString(),
-        dataCadastro: new Date().toISOString()
-      }));
-      setCarregando(false);
-      navegacao.replace("/auth/login");
-    } catch {
+      console.log('Tentando cadastro na API...');
+      
+      const userData = {
+        name: nome,
+        email: email,
+        cpf: cpf,
+        password: senha,
+        date_of_birth: '1990-01-01'
+      };
+      
+      console.log('Dados do usuário:', userData);
+      
+      try {
+        const response = await ApiService.register(userData);
+        console.log('Resposta da API:', response);
+        
+        if (response.success) {
+          // Salvar token JWT
+          await AsyncStorage.setItem('auth_token', response.access_token);
+          
+          // Salvar dados do usuário
+          await AsyncStorage.setItem('usuario', JSON.stringify({
+            id: response.client.id,
+            name: response.client.name,
+            email: response.client.email,
+            cpf: response.client.cpf,
+            points_balance: response.client.points_balance
+          }));
+          
+          // Login automático após cadastro
+          Alert.alert("Sucesso", "Cadastro realizado com sucesso!", [
+            { text: "OK", onPress: () => navegacao.replace("/(tabs)") }
+          ]);
+          setCarregando(false);
+          return;
+        }
+        
+      } catch (apiError: any) {
+        console.log('API cadastro falhou:', apiError);
+        
+        if (apiError.message?.includes('already exists')) {
+          Alert.alert("Erro", "Email ou CPF já cadastrado");
+          setCarregando(false);
+          return;
+        }
+        
+        // Se API falhou, redirecionar para login
+        Alert.alert("Erro", "Falha no cadastro. Tente novamente.");
+        setCarregando(false);
+        return;
+      }
+      
+    } catch (error) {
+      console.error('Erro no cadastro:', error);
       Alert.alert("Erro", "Falha ao cadastrar. Tente novamente.");
       setCarregando(false);
     }
@@ -80,16 +98,17 @@ export default function TelaCadastro() {
       <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
       
       {/* Botão voltar */}
-      <TouchableOpacity style={estilos.botaoVoltar} onPress={() => navegacao.back()}>
-        <Text style={estilos.setaVoltar}>←</Text>
+      <TouchableOpacity style={estilos.botaoVoltar} onPress={() => navegacao.replace('/auth/login')}>
+        <Ionicons name="arrow-back" size={24} color="#333" />
       </TouchableOpacity>
       
       {/* Logo */}
       <View style={estilos.logoContainer}>
-        <View style={estilos.logo}>
-          <Text style={estilos.logoText}>P</Text>
-        </View>
-        <Text style={estilos.pontueiText}>Pontuei.</Text>
+        <Image 
+          source={require('../../assets/images/pontuei logo.svg')}
+          style={{ width: 100, height: 100 }}
+          resizeMode="contain"
+        />
       </View>
 
       {/* Título */}
@@ -104,85 +123,43 @@ export default function TelaCadastro() {
         <Text style={estilos.label}>Nome Completo *</Text>
         <TextInput
           placeholder="Digite seu nome completo"
-          style={[estilos.input, erroNome ? estilos.inputErro : null]}
+          style={estilos.input}
           value={nome}
-          onChangeText={(texto) => {
-            setNome(texto);
-            if (texto.trim() === "") {
-              setErroNome("Nome é obrigatório");
-            } else if (texto.trim().length < 2) {
-              setErroNome("Nome deve ter pelo menos 2 caracteres");
-            } else {
-              setErroNome("");
-            }
-          }}
+          onChangeText={setNome}
           autoCapitalize="words"
         />
-        {erroNome ? <Text style={estilos.textoErro}>{erroNome}</Text> : null}
+
         
         <Text style={estilos.label}>CPF *</Text>
         <TextInput
           placeholder="000.000.000-00"
-          style={[estilos.input, erroCpf ? estilos.inputErro : null]}
+          style={estilos.input}
           value={cpf}
-          onChangeText={(texto) => {
-            const cpfFormatado = formatarCPF(texto);
-            setCpf(cpfFormatado);
-            if (texto.trim() === "") {
-              setErroCpf("CPF é obrigatório");
-            } else if (!validarCPF(cpfFormatado)) {
-              setErroCpf("CPF inválido");
-            } else {
-              setErroCpf("");
-            }
-          }}
+          onChangeText={setCpf}
           keyboardType="numeric"
           maxLength={14}
         />
-        {erroCpf ? <Text style={estilos.textoErro}>{erroCpf}</Text> : null}
+
         
         <Text style={estilos.label}>E-Mail *</Text>
         <TextInput
           placeholder="seuemail@gmail.com"
-          style={[estilos.input, erroEmail ? estilos.inputErro : null]}
+          style={estilos.input}
           value={email}
-          onChangeText={(texto) => {
-            setEmail(texto);
-            if (texto.trim() === "") {
-              setErroEmail("E-mail é obrigatório");
-            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(texto)) {
-              setErroEmail("Digite um e-mail válido");
-            } else {
-              setErroEmail("");
-            }
-          }}
+          onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
         />
-        {erroEmail ? <Text style={estilos.textoErro}>{erroEmail}</Text> : null}
+
         
         <Text style={estilos.label}>Senha *</Text>
         <View style={estilos.containerSenha}>
           <TextInput
             placeholder="digite sua senha"
             secureTextEntry={!mostrarSenha}
-            style={[estilos.inputSenha, erroSenha ? estilos.inputErro : null]}
+            style={estilos.inputSenha}
             value={senha}
-            onChangeText={(texto) => {
-              setSenha(texto);
-              if (texto.trim() === "") {
-                setErroSenha("Senha é obrigatória");
-              } else if (!validarSenha(texto)) {
-                setErroSenha("Senha deve ter 8+ caracteres, maiúscula, minúscula, número e símbolo");
-              } else {
-                setErroSenha("");
-              }
-              if (confirmarSenha && texto !== confirmarSenha) {
-                setErroConfirmarSenha("As senhas não coincidem");
-              } else if (confirmarSenha && texto === confirmarSenha) {
-                setErroConfirmarSenha("");
-              }
-            }}
+            onChangeText={setSenha}
             accessibilityLabel="Campo de senha"
           />
           <TouchableOpacity 
@@ -197,25 +174,16 @@ export default function TelaCadastro() {
             />
           </TouchableOpacity>
         </View>
-        {erroSenha ? <Text style={estilos.textoErro}>{erroSenha}</Text> : null}
+
         
         <Text style={estilos.label}>Confirme sua senha *</Text>
         <View style={estilos.containerSenha}>
           <TextInput
             placeholder="confirme sua senha"
             secureTextEntry={!mostrarConfirmarSenha}
-            style={[estilos.inputSenha, erroConfirmarSenha ? estilos.inputErro : null]}
+            style={estilos.inputSenha}
             value={confirmarSenha}
-            onChangeText={(texto) => {
-              setConfirmarSenha(texto);
-              if (texto.trim() === "") {
-                setErroConfirmarSenha("Confirmação de senha é obrigatória");
-              } else if (senha !== texto) {
-                setErroConfirmarSenha("As senhas não coincidem");
-              } else {
-                setErroConfirmarSenha("");
-              }
-            }}
+            onChangeText={setConfirmarSenha}
             accessibilityLabel="Campo de confirmação de senha"
           />
           <TouchableOpacity 
@@ -230,7 +198,7 @@ export default function TelaCadastro() {
             />
           </TouchableOpacity>
         </View>
-        {erroConfirmarSenha ? <Text style={estilos.textoErro}>{erroConfirmarSenha}</Text> : null}
+
       </View>
 
       {/* Botão Cadastrar */}
@@ -256,37 +224,19 @@ export default function TelaCadastro() {
         </TouchableOpacity>
       </Animated.View>
 
-      {/* Realizar cadastro com */}
-      <Text style={estilos.realizarCadastro}>Realizar cadastro com</Text>
-      
       {/* Botão demo rápido */}
       <TouchableOpacity 
         style={estilos.botaoRapido}
         onPress={() => {
-          setNome("João Silva");
+          setNome("Eric Bauer");
           setCpf("12345678909");
-          setEmail("joao@pontuei.com");
-          setSenha("123456");
-          setConfirmarSenha("123456");
-          setErroNome("");
-          setErroCpf("");
-          setErroEmail("");
-          setErroSenha("");
-          setErroConfirmarSenha("");
+          setEmail("eric@pontuei.com");
+          setSenha("1234Abcd!");
+          setConfirmarSenha("1234Abcd!");
         }}
       >
-        <Text style={estilos.textoRapido}>⚡ Demo</Text>
+        <Text style={estilos.textoRapido}> Demo</Text>
       </TouchableOpacity>
-      
-      {/* Botões sociais */}
-      <View style={estilos.botoesContainer}>
-        <TouchableOpacity style={estilos.botaoSocial}>
-          <Text style={estilos.textoSocial}>G</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={estilos.botaoSocial}>
-          <Text style={estilos.textoSocial}>f</Text>
-        </TouchableOpacity>
-      </View>
     </ScrollView>
   );
 }
@@ -297,7 +247,7 @@ const estilos = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   contentContainer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 40,
   },
@@ -311,38 +261,10 @@ const estilos = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  setaVoltar: {
-    fontSize: 20,
-    color: "#333",
-  },
   logoContainer: {
     alignItems: "center",
-    marginBottom: 25,
-    marginTop: 70,
-  },
-  logo: {
-    width: 55,
-    height: 55,
-    backgroundColor: "#ff4757",
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-    shadowColor: "#ff4757",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 6,
-  },
-  logoText: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  pontueiText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
+    marginBottom: 15,
+    marginTop: 20,
   },
   titulo: {
     fontSize: 22,
@@ -401,43 +323,8 @@ const estilos = StyleSheet.create({
     fontWeight: "600",
     fontSize: 16,
   },
-  realizarCadastro: {
-    textAlign: "center",
-    color: "#666",
-    fontSize: 13,
-    marginBottom: 15,
-  },
-  botoesContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 12,
-    marginBottom: 20,
-  },
-  botaoSocial: {
-    width: 45,
-    height: 45,
-    backgroundColor: "white",
-    borderRadius: 22,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-  },
-  textoSocial: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  inputErro: {
-    borderColor: "#ff4757",
-    borderWidth: 2,
-  },
-  textoErro: {
-    color: "#ff4757",
-    fontSize: 12,
-    marginTop: -8,
-    marginBottom: 8,
-  },
+
+
   containerSenha: {
     flexDirection: "row",
     alignItems: "center",

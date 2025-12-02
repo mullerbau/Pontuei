@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../contexts/CartContext';
@@ -9,6 +9,7 @@ interface Product {
   price: string;
   image: any;
   description?: string;
+  quantity?: number;
 }
 
 interface ProductModalProps {
@@ -19,7 +20,15 @@ interface ProductModalProps {
 
 export default function ProductModal({ visible, product, onClose }: ProductModalProps) {
   const [quantity, setQuantity] = useState(1);
-  const { addItem, items } = useCart();
+  const { addItem, removeItem, items } = useCart();
+
+  useEffect(() => {
+    if (product && product.quantity !== undefined) {
+      setQuantity(product.quantity > 0 ? product.quantity : 1);
+    } else {
+      setQuantity(1);
+    }
+  }, [product]);
 
   if (!product) return null;
 
@@ -36,6 +45,18 @@ export default function ProductModal({ visible, product, onClose }: ProductModal
     }
     onClose();
     setQuantity(1);
+  };
+
+  const handleRemoveFromCart = () => {
+    if (currentQuantity > 0) {
+      removeItem(product.id);
+      const newCurrentQuantity = currentQuantity - 1;
+      if (newCurrentQuantity > 0) {
+        setQuantity(newCurrentQuantity);
+      } else {
+        setQuantity(1);
+      }
+    }
   };
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
@@ -84,11 +105,19 @@ export default function ProductModal({ visible, product, onClose }: ProductModal
             </View>
           </View>
 
-          <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
-            <Text style={styles.addButtonText}>
-              Adicionar ao Carrinho
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.buttonContainer}>
+            {currentQuantity > 0 && (
+              <TouchableOpacity style={styles.removeButton} onPress={handleRemoveFromCart}>
+                <Ionicons name="remove-circle" size={20} color="#fff" />
+                <Text style={styles.removeButtonText}>Remover</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={[styles.addButton, currentQuantity > 0 && styles.addButtonSmall]} onPress={handleAddToCart}>
+              <Text style={styles.addButtonText}>
+                Adicionar ao Carrinho
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
@@ -184,15 +213,39 @@ const styles = StyleSheet.create({
     color: '#333',
     marginHorizontal: 20,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
   addButton: {
     backgroundColor: '#ff3366',
     paddingVertical: 16,
     borderRadius: 25,
     alignItems: 'center',
+    flex: 1,
+  },
+  addButtonSmall: {
+    flex: 2,
   },
   addButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  removeButton: {
+    backgroundColor: '#dc3545',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    flex: 1,
+  },
+  removeButtonText: {
+    color: '#fff',
+    fontSize: 14,
     fontWeight: 'bold',
   },
 });

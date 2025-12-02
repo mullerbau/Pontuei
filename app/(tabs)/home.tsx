@@ -2,8 +2,12 @@ import { Poppins_400Regular, Poppins_600SemiBold, useFonts } from '@expo-google-
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import UserHeader from '@/components/UserHeader';
+import { ApiService, Establishment } from '../../services/api';
+import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 const isTablet = width > 425;
@@ -15,12 +19,24 @@ const restaurantImages = {
   versa: require('@/assets/images/logo-restaurantes/versa.jpg'),
 };
 
-const establishments = [
-  { id: 1, name: 'DiaDe', image: restaurantImages.diade, rating: 4.8, distance: '0.2 km' },
-  { id: 2, name: 'AM/PM', image: restaurantImages.ampm, rating: 4.2, distance: '0.5 km' },
-  { id: 3, name: 'Differ', image: restaurantImages.differ, rating: 4.6, distance: '0.8 km' },
-  { id: 4, name: 'Versa', image: restaurantImages.versa, rating: 4.4, distance: '1.2 km' },
-];
+const getRestaurantImage = (establishment: Establishment) => {
+  // Se tem logo_url da API, usa ela
+  if (establishment.logo_url) {
+    return { uri: establishment.logo_url };
+  }
+  
+  // Fallback para imagens locais
+  const imageMap = {
+    'DiaDe': restaurantImages.diade,
+    'AM/PM': restaurantImages.ampm,
+    'Differ': restaurantImages.differ,
+    'Versa': restaurantImages.versa,
+  };
+  return imageMap[establishment.name] || restaurantImages.diade;
+};
+
+const getRandomRating = () => (4.2 + Math.random() * 0.7).toFixed(1);
+const getRandomDistance = () => (0.3 + Math.random() * 1.2).toFixed(1) + ' km';
 
 const services = [
   { id: 1, name: 'Barbearias', description: 'Agende seu corte pelo App!', icon: 'cut' },
@@ -30,45 +46,31 @@ const services = [
 ];
 
 const adBanners = [
-  { id: 1, text: ' APROVEITA A PROMOÇÃO LOCK', colors: ['#ff3366', '#ff5e5e'] },
-  { id: 2, text: ' Promoções Especiais', colors: ['#ff3366', '#ff5e5e'] },
-  { id: 3, text: ' Pontos em Dobro', colors: ['#ff3366', '#ff5e5e'] },
+  { id: 1, text: ' APROVEITA A PROMOÇÃO LOCK', colors: ['#ff3366', '#ff5e5e'], image: require('@/assets/images/carroussel-ads/ad1.png') },
+  { id: 2, text: ' Promoções Especiais', colors: ['#ff3366', '#ff5e5e'], image: require('@/assets/images/carroussel-ads/ad2.png') },
+  { id: 3, text: ' Pontos em Dobro', colors: ['#ff3366', '#ff5e5e'], image: require('@/assets/images/carroussel-ads/ad1.png') },
 ];
 
-const featuredStores = [
-  { id: 1, name: 'DiaDe', image: restaurantImages.diade, rating: 4.8, distance: '0.2 km', specialty: 'Lanches e Bebidas' },
-  { id: 2, name: 'AM/PM', image: restaurantImages.ampm, rating: 4.2, distance: '0.5 km', specialty: 'Conveniência 24h' },
-  { id: 3, name: 'Differ', image: restaurantImages.differ, rating: 4.6, distance: '0.8 km', specialty: 'Restaurante Gourmet' },
-  { id: 4, name: 'Versa', image: restaurantImages.versa, rating: 4.4, distance: '1.2 km', specialty: 'Café e Doces' },
-];
 
-const nearbyStores = [
-  { id: 1, name: 'DiaDe', image: restaurantImages.diade, rating: 4.8, distance: '0.2 km' },
-  { id: 2, name: 'AM/PM', image: restaurantImages.ampm, rating: 4.2, distance: '0.5 km' },
-  { id: 3, name: 'Differ', image: restaurantImages.differ, rating: 4.6, distance: '0.8 km' },
-  { id: 4, name: 'Versa', image: restaurantImages.versa, rating: 4.4, distance: '1.2 km' },
-];
 
-function EstablishmentCard({ name, image, rating, distance }) {
+function EstablishmentCard({ establishment }: { establishment: Establishment }) {
   const handlePress = () => {
-    if (name === 'DiaDe') {
-      router.push('/loja');
-    }
+    router.push(`/loja/${establishment.id}`);
   };
 
   return (
     <TouchableOpacity style={styles.establishmentCard} onPress={handlePress}>
       <View style={styles.establishmentLogo}>
-        <Image source={image} style={styles.establishmentImage} resizeMode="cover" />
+        <Image source={getRestaurantImage(establishment)} style={styles.establishmentImage} resizeMode="cover" />
       </View>
-      <Text style={styles.establishmentName}>{name}</Text>
+      <Text style={styles.establishmentName}>{establishment.name}</Text>
       <View style={styles.establishmentInfo}>
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={10} color="#FFD700" />
-          <Text style={styles.ratingText}>{rating}</Text>
+          <Text style={styles.ratingText}>{getRandomRating()}</Text>
         </View>
         <Text style={styles.pipelineText}>|</Text>
-        <Text style={styles.distanceText} numberOfLines={1}>{distance}</Text>
+        <Text style={styles.distanceText} numberOfLines={1}>{getRandomDistance()}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -89,21 +91,25 @@ function ServiceCard({ name, description, icon }) {
   );
 }
 
-function FeaturedCard({ name, image, rating, distance, specialty }) {
+function FeaturedCard({ establishment }: { establishment: Establishment }) {
+  const handlePress = () => {
+    router.push(`/loja/${establishment.id}`);
+  };
+
   return (
-    <TouchableOpacity style={styles.featuredCard}>
+    <TouchableOpacity style={styles.featuredCard} onPress={handlePress}>
       <View style={styles.featuredImageContainer}>
-        <Image source={image} style={styles.featuredImage} resizeMode="cover" />
+        <Image source={getRestaurantImage(establishment)} style={styles.featuredImage} resizeMode="cover" />
       </View>
       <View style={styles.featuredContent}>
-        <Text style={styles.featuredName}>{name}</Text>
-        <Text style={styles.featuredSpecialty}>{specialty}</Text>
+        <Text style={styles.featuredName}>{establishment.name}</Text>
+        <Text style={styles.featuredSpecialty}>{establishment.description || establishment.category}</Text>
         <View style={styles.featuredInfo}>
           <View style={styles.featuredRating}>
             <Ionicons name="star" size={12} color="#FFD700" />
-            <Text style={styles.featuredRatingText}>{rating}</Text>
+            <Text style={styles.featuredRatingText}>{getRandomRating()}</Text>
           </View>
-          <Text style={styles.featuredDistance}>{distance}</Text>
+          <Text style={styles.featuredDistance}>{getRandomDistance()}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -122,7 +128,7 @@ function AdBannerCarousel() {
       {adBanners.map((banner) => (
         <View key={banner.id} style={styles.adBanner}>
           <Image 
-            source={require('@/assets/images/carroussel-ads/ad1.png')}
+            source={banner.image}
             style={styles.adBannerImage}
             resizeMode="cover"
           />
@@ -138,6 +144,67 @@ export default function HomeScreen() {
     Poppins_600SemiBold,
   });
 
+  const [establishments, setEstablishments] = useState<Establishment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [visitedEstablishments, setVisitedEstablishments] = useState<string[]>([]);
+
+  useEffect(() => {
+    loadVisitedEstablishments();
+    loadEstablishments();
+  }, []);
+
+  const loadVisitedEstablishments = async () => {
+    try {
+      const visited = await AsyncStorage.getItem('visitedEstablishments');
+      if (visited) {
+        setVisitedEstablishments(JSON.parse(visited));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar estabelecimentos visitados:', error);
+    }
+  };
+
+  const loadEstablishments = async () => {
+    try {
+      setLoading(true);
+      
+      // Tentar carregar da API, se falhar usar dados locais
+      try {
+        const data = await ApiService.getEstablishments();
+        const sortedData = sortEstablishmentsByVisited(data);
+        setEstablishments(sortedData);
+      } catch (apiError) {
+        console.log('API não disponível, usando dados locais');
+        const fallbackData = ApiService.getFallbackEstablishments();
+        const sortedFallback = sortEstablishmentsByVisited(fallbackData);
+        setEstablishments(sortedFallback);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar estabelecimentos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sortEstablishmentsByVisited = (establishments: Establishment[]) => {
+    return establishments.sort((a, b) => {
+      const aIndex = visitedEstablishments.indexOf(a.id);
+      const bIndex = visitedEstablishments.indexOf(b.id);
+      
+      // Se ambos foram visitados, ordenar por mais recente (menor índice)
+      if (aIndex !== -1 && bIndex !== -1) {
+        return aIndex - bIndex;
+      }
+      
+      // Se apenas um foi visitado, colocar o visitado primeiro
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+      
+      // Se nenhum foi visitado, manter ordem original
+      return 0;
+    });
+  };
+
   if (!fontsLoaded) {
     return null;
   }
@@ -146,26 +213,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
 
-          <View style={styles.headerContent}>
-            
-          <View style={styles.welcomeContainer}>
-            <Image 
-              source={require('@/assets/images/pontuei logo.svg')}
-              style={styles.profileImage}
-            />
-            <View style={styles.welcomeTexts}>
-              <Text style={styles.welcomeText}>Bem vindo de volta.</Text>
-              <Text style={styles.userName}>Eric Bauer!</Text>
-            </View>
-            {/* <View style={styles.logoContainer}>
-              <Image 
-                source={require('@/assets/images/pontuei logo.svg')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-            </View> */}
-          </View>
-          </View>
+        <UserHeader showWelcome />
 
         {/* Search Bar */}
         <View style={styles.searchWrapper}>
@@ -182,29 +230,34 @@ export default function HomeScreen() {
         {/* Last Visited Establishments */}
         
         <Text style={styles.sectionTitle}>Últimos estabelecimentos visitados</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.establishmentsScroll}>
-          {establishments.map((item) => (
-            <EstablishmentCard key={item.id} name={item.name} image={item.image} rating={item.rating} distance={item.distance} />
-          ))}
-        </ScrollView>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color="#E94057" />
+          </View>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.establishmentsScroll}>
+            {establishments.map((establishment) => (
+              <EstablishmentCard key={establishment.id} establishment={establishment} />
+            ))}
+          </ScrollView>
+        )}
 
         {/* Ad Banner Carousel */}
         <AdBannerCarousel />
 
         {/* Featured Section */}
         <Text style={styles.sectionTitle}>Destaques</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.featuredScroll}>
-          {featuredStores.map((item) => (
-            <FeaturedCard
-              key={item.id}
-              name={item.name}
-              image={item.image}
-              rating={item.rating}
-              distance={item.distance}
-              specialty={item.specialty}
-            />
-          ))}
-        </ScrollView>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color="#E94057" />
+          </View>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.featuredScroll}>
+            {establishments.map((establishment) => (
+              <FeaturedCard key={establishment.id} establishment={establishment} />
+            ))}
+          </ScrollView>
+        )}
 
         {/* Services Section */}
         <Text style={styles.sectionTitle}>Serviços</Text>
@@ -221,11 +274,17 @@ export default function HomeScreen() {
 
         {/* Nearby Stores */}
         <Text style={styles.sectionTitle}>Lojas próximas de você</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.establishmentsScroll}>
-          {nearbyStores.map((item) => (
-            <EstablishmentCard key={item.id} name={item.name} image={item.image} rating={item.rating} distance={item.distance} />
-          ))}
-        </ScrollView>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color="#E94057" />
+          </View>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.establishmentsScroll}>
+            {establishments.map((establishment) => (
+              <EstablishmentCard key={establishment.id} establishment={establishment} />
+            ))}
+          </ScrollView>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -239,54 +298,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 20,
   },
-  headerContent: {
 
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '10vh',
-    paddingTop: 20,
-    marginTop: 10,
-    
-  },
-  logoContainer: {
-  },
-  logo: {
-    paddingTop: 10,
-    width: 120,
-    height: 120,
-  
-  },
-  pontueiText: {
-    color: '#000000ff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  welcomeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 15,
-  },
-  welcomeTexts: {
-    flex: 1,
-  },
-  welcomeText: {
-    fontSize: 14,
-    color: 'rgba(0, 0, 0, 0.9)',
-    fontFamily: 'Poppins_400Regular',
-    marginBottom: 4,
-  },
-  userName: {
-    fontSize: 24,
-    color: '#E94057',
-    fontFamily: 'Poppins_600SemiBold',
-    fontWeight: 'bold',
-  },
   searchWrapper: {
     paddingHorizontal: 20,
     marginTop: 25,
@@ -539,5 +551,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     fontFamily: 'Poppins_400Regular',
+  },
+  loadingContainer: {
+    height: 130,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 20,
   },
 });

@@ -9,7 +9,7 @@ export interface Order {
     quantity: number;
   }>;
   total: string;
-  status: 'em_preparo' | 'pronto' | 'entregue';
+  status: 'em_preparo' | 'pronto' | 'concluido';
   paymentMethod: string;
   deliveryMethod: string;
   createdAt: Date;
@@ -18,6 +18,7 @@ export interface Order {
 interface OrderContextType {
   orders: Order[];
   addOrder: (order: Omit<Order, 'id' | 'createdAt'>) => void;
+  updateOrderStatus: (orderId: string, status: Order['status']) => void;
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
@@ -34,8 +35,14 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     setOrders(prev => [newOrder, ...prev]);
   };
 
+  const updateOrderStatus = (orderId: string, status: Order['status']) => {
+    setOrders(prev => prev.map(order => 
+      order.id === orderId ? { ...order, status } : order
+    ));
+  };
+
   return (
-    <OrderContext.Provider value={{ orders, addOrder }}>
+    <OrderContext.Provider value={{ orders, addOrder, updateOrderStatus }}>
       {children}
     </OrderContext.Provider>
   );

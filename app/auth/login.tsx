@@ -1,17 +1,16 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar, ScrollView, Alert, ActivityIndicator, Animated } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar, ScrollView, Alert, ActivityIndicator, Animated, Image } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState, useRef } from "react";
 import { Ionicons } from '@expo/vector-icons';
-import CryptoJS from 'crypto-js';
+import { ApiService } from '../../services/api';
 
 export default function TelaLogin() {
   const navegacao = useRouter();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [erroEmail, setErroEmail] = useState("");
-  const [erroSenha, setErroSenha] = useState("");
+
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const animacao = useRef(new Animated.Value(1)).current;
@@ -27,31 +26,32 @@ export default function TelaLogin() {
     setCarregando(true);
     
     try {
-      // Login de demonstração
-      if (email === "joao@pontuei.com" && senha === "123456") {
+      const response = await ApiService.login(email, senha);
+      
+      if (response.success) {
+        // Salvar token JWT
+        await AsyncStorage.setItem('auth_token', response.access_token);
+        
+        // Salvar dados do usuário
+        await AsyncStorage.setItem('usuario', JSON.stringify({
+          id: response.client.id,
+          name: response.client.name,
+          email: response.client.email,
+          cpf: response.client.cpf,
+          points_balance: response.client.points_balance
+        }));
+        
         setCarregando(false);
         navegacao.replace("/(tabs)");
         return;
       }
       
-      // Simulação temporária com AsyncStorage
-      const usuario = await AsyncStorage.getItem("usuario");
-      if (usuario) {
-        const dados = JSON.parse(usuario);
-        if (dados.email === email && dados.senha === CryptoJS.SHA256(senha).toString()) {
-          setCarregando(false);
-          navegacao.replace("/(tabs)");
-        } else {
-          Alert.alert("Erro", "E-mail ou senha incorretos");
-          setCarregando(false);
-        }
-      } else {
-        Alert.alert("Erro", "Usuário não encontrado. Cadastre-se primeiro.");
-        setCarregando(false);
-      }
+      Alert.alert("Erro", "Email ou senha inválidos");
+      setCarregando(false);
+      
     } catch (error) {
       console.error('Erro no login:', error);
-      Alert.alert("Erro", "Falha na conexão. Tente novamente.");
+      Alert.alert("Erro", "Falha na conexão com o servidor. Verifique sua internet.");
       setCarregando(false);
     }
   };
@@ -62,10 +62,11 @@ export default function TelaLogin() {
       
       {/* Logo */}
       <View style={estilos.logoContainer}>
-        <View style={estilos.logo}>
-          <Text style={estilos.logoText}>P</Text>
-        </View>
-        <Text style={estilos.pontueiText}>Pontuei.</Text>
+        <Image 
+          source={require('../../assets/images/pontuei logo.svg')} 
+          style={{ width: 100, height: 100 }}
+          resizeMode="contain"
+        />
       </View>
 
       {/* Título */}
@@ -80,38 +81,22 @@ export default function TelaLogin() {
         <Text style={estilos.label}>E-Mail</Text>
         <TextInput
           placeholder="seuemail@gmail.com"
-          style={[estilos.input, erroEmail ? estilos.inputErro : null]}
+          style={estilos.input}
           value={email}
-          onChangeText={(texto) => {
-            setEmail(texto);
-            if (texto.trim() === "") {
-              setErroEmail("E-mail é obrigatório");
-            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(texto)) {
-              setErroEmail("Digite um e-mail válido");
-            } else {
-              setErroEmail("");
-            }
-          }}
+          onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
         />
-        {erroEmail ? <Text style={estilos.textoErro}>{erroEmail}</Text> : null}
+
         
         <Text style={estilos.label}>Senha</Text>
         <View style={estilos.containerSenha}>
           <TextInput
             placeholder="*********"
             secureTextEntry={!mostrarSenha}
-            style={[estilos.inputSenha, erroSenha ? estilos.inputErro : null]}
+            style={estilos.inputSenha}
             value={senha}
-            onChangeText={(texto) => {
-              setSenha(texto);
-              if (texto.trim() === "") {
-                setErroSenha("Senha é obrigatória");
-              } else {
-                setErroSenha("");
-              }
-            }}
+            onChangeText={setSenha}
             accessibilityLabel="Campo de senha"
           />
           <TouchableOpacity 
@@ -126,7 +111,7 @@ export default function TelaLogin() {
             />
           </TouchableOpacity>
         </View>
-        {erroSenha ? <Text style={estilos.textoErro}>{erroSenha}</Text> : null}
+
         <Text style={estilos.esqueceuSenha}>Esqueceu minha senha</Text>
       </View>
 
@@ -153,30 +138,17 @@ export default function TelaLogin() {
         </TouchableOpacity>
       </Animated.View>
 
-      {/* Entrar com */}
-      <Text style={estilos.entrarCom}>Entrar com</Text>
-      
-      {/* Botões sociais */}
-      <View style={estilos.botoesContainer}>
-        <TouchableOpacity style={estilos.botaoSocial}>
-          <Text style={estilos.textoSocial}>G</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={estilos.botaoSocial}>
-          <Text style={estilos.textoSocial}>f</Text>
-        </TouchableOpacity>
-      </View>
+
 
       {/* Botão demo rápido */}
       <TouchableOpacity 
         style={estilos.botaoRapido}
         onPress={() => {
-          setEmail("joao@pontuei.com");
-          setSenha("123456");
-          setErroEmail("");
-          setErroSenha("");
+          setEmail("eric@pontuei.com");
+          setSenha("1234Abcd!");
         }}
       >
-        <Text style={estilos.textoRapido}>⚡ Demo</Text>
+        <Text style={estilos.textoRapido}>Demo</Text>
       </TouchableOpacity>
 
       {/* Link cadastro */}
@@ -197,31 +169,12 @@ const estilos = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 20,
-    paddingTop: 80,
+    paddingTop: 30,
     paddingBottom: 40,
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: 30,
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    backgroundColor: "#ff4757",
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  logoText: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  pontueiText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
+    marginBottom: 15,
   },
   titulo: {
     fontSize: 22,
@@ -276,33 +229,7 @@ const estilos = StyleSheet.create({
     fontWeight: "600",
     fontSize: 16,
   },
-  entrarCom: {
-    textAlign: "center",
-    color: "#666",
-    fontSize: 13,
-    marginBottom: 15,
-  },
-  botoesContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 12,
-    marginBottom: 30,
-  },
-  botaoSocial: {
-    width: 45,
-    height: 45,
-    backgroundColor: "white",
-    borderRadius: 22,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-  },
-  textoSocial: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-  },
+
   cadastroContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -317,16 +244,7 @@ const estilos = StyleSheet.create({
     color: "#ff4757",
     fontWeight: "600",
   },
-  inputErro: {
-    borderColor: "#ff4757",
-    borderWidth: 2,
-  },
-  textoErro: {
-    color: "#ff4757",
-    fontSize: 12,
-    marginTop: -8,
-    marginBottom: 8,
-  },
+
   containerSenha: {
     flexDirection: "row",
     alignItems: "center",
