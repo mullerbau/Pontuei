@@ -1,24 +1,22 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Stack } from "expo-router";
+import { CartProvider } from '../contexts/CartContext';
+import { OrderProvider } from '../contexts/OrderContext';
+import { UserProvider } from '../contexts/UserContext';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
+export default function LayoutPrincipal() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <UserProvider>
+      <OrderProvider>
+        <CartProvider>
+          <Stack screenOptions={{ headerShown: false }} initialRouteName="auth">
+            <Stack.Screen name="auth" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="loja" />
+            <Stack.Screen name="finalizacao-pedido" />
+            <Stack.Screen name="pedido-sucesso" />
+          </Stack>
+        </CartProvider>
+      </OrderProvider>
+    </UserProvider>
   );
 }
