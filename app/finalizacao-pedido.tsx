@@ -123,15 +123,7 @@ export default function FinalizacaoPedido() {
           <Ionicons name="arrow-back" size={24} color="#E94057" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Finalizar Pedido</Text>
-        <TouchableOpacity 
-          style={styles.debugButton}
-          onPress={async () => {
-            const connection = await ApiService.testConnection();
-            Alert.alert('Debug', `API: ${connection ? 'OK' : 'NÃO'}`);
-          }}
-        >
-          <Text style={styles.debugText}>Debug</Text>
-        </TouchableOpacity>
+        <View />
       </View>
 
       <ScrollView style={styles.content}>
@@ -366,14 +358,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#E94057',
   },
-  debugButton: {
-    backgroundColor: '#666',
-    padding: 5,
-    borderRadius: 5,
-    marginLeft: 10,
-  },
-  debugText: {
-    color: '#fff',
-    fontSize: 12,
-  },
+
 });
