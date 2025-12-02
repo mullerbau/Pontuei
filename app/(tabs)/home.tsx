@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   adBanner: {
-    width: isTablet ? width * 0.7 : '85vw',
+    width: isTablet ? width * 0.85 : '92vw',
     height: isTablet ? 160 : 120,
     borderRadius: 15,
     justifyContent: 'center',
