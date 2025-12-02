@@ -4,7 +4,7 @@
     "slug": "pontuei",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/pontuei logo.svg",
     "scheme": "pontuei",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
