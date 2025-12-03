@@ -1,12 +1,14 @@
 import { Poppins_400Regular, Poppins_600SemiBold, useFonts } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCart } from '../../contexts/CartContext';
 import { useOrders } from '../../contexts/OrderContext';
 import { useUser } from '../../contexts/UserContext';
 import { useState, useRef, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dimensions } from 'react-native';
 import ProductModal from '../../components/ProductModal';
 import { ApiService, Product, Establishment } from '../../services/api';
@@ -101,18 +103,26 @@ export default function LojaScreen() {
 
   const { items, getTotalPrice, clearCart, itemCount } = useCart();
   const { orders } = useOrders();
-  const { getStorePoints, setLastStore } = useUser();
+  const { getStorePoints, setLastStore, refreshUserPoints } = useUser();
   const [storePoints, setStorePoints] = useState(0);
 
+  const loadStorePoints = async () => {
+    if (id) {
+      const points = await getStorePoints(id);
+      setStorePoints(points);
+    }
+  };
+
   useEffect(() => {
-    const loadStorePoints = async () => {
-      if (id) {
-        const points = await getStorePoints(id);
-        setStorePoints(points);
-      }
-    };
     loadStorePoints();
   }, [id, getStorePoints]);
+
+  // Listener para atualizar pontos quando a tela ganha foco
+  useFocusEffect(
+    useCallback(() => {
+      loadStorePoints();
+    }, [id])
+  );
   const [showExitAlert, setShowExitAlert] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProductModal, setShowProductModal] = useState(false);
@@ -172,27 +182,59 @@ export default function LojaScreen() {
     }
   };
 
-  // Usuários fake do ranking
-  const fakeUsers = [
-    { name: 'Edécio Fernando', points: 1850 },
-    { name: 'Angelo Luz', points: 1620 },
-    { name: 'Bruna', points: 1450 },
-    { name: 'Pablo Chiaro', points: 1280 },
-    { name: 'Arthur Ortiz', points: 980 },
-  ];
+  // Estado do ranking
+  const [establishmentRanking, setEstablishmentRanking] = useState<any[]>([]);
+  
+  // Carregar ranking do estabelecimento
+  useEffect(() => {
+    if (id) {
+      loadEstablishmentRanking();
+    }
+  }, [id, storePoints]); // Recarregar quando pontos mudarem
+
+  const loadEstablishmentRanking = async () => {
+    try {
+      const ranking = await ApiService.getEstablishmentRanking(id!);
+      setEstablishmentRanking(ranking);
+    } catch (error) {
+      console.error('Erro ao carregar ranking:', error);
+      // Fallback com dados falsos incluindo pontos reais do usuário
+      const userPoints = storePoints; // Usar pontos reais do usuário
+      
+      // Buscar nome do usuário do perfil
+      let userName = 'Usuário';
+      try {
+        const userData = await AsyncStorage.getItem('usuario');
+        if (userData) {
+          const user = JSON.parse(userData);
+          userName = user.name || 'Usuário';
+        }
+      } catch (e) {
+        console.log('Erro ao buscar nome do usuário:', e);
+      }
+      
+      const fakeUsers = [
+        { client: { id: '1', name: 'Edécio Fernando' }, points: 1250 },
+        { client: { id: '2', name: 'Gladimir' }, points: 980 },
+        { client: { id: '3', name: 'Bruna Ribeiro' }, points: 750 },
+        { client: { id: '4', name: 'Angelo Luz' }, points: 620 },
+        { client: { id: '5', name: 'Pablo Chiaro' }, points: 450 },
+        { client: { id: '6', name: 'Wagner Loch' }, points: 320 },
+      ];
+      
+      // Adicionar usuário atual com pontos reais e nome do perfil
+      const currentUser = { client: { id: '0', name: userName }, points: userPoints };
+      fakeUsers.push(currentUser);
+      
+      // Ordenar por pontos (decrescente) e manter posição correta
+      const sortedUsers = fakeUsers.sort((a, b) => b.points - a.points);
+      setEstablishmentRanking(sortedUsers);
+    }
+  };
   
   // Criar ranking completo
   const getRanking = () => {
-    const userPoints = calcularPontosDiaDe();
-    const allUsers = [...fakeUsers];
-    
-    // Se o usuário tem pontos, adiciona ele no ranking
-    if (userPoints > 0) {
-      allUsers.push({ name: 'Eric Bauer', points: userPoints });
-    }
-    
-    // Ordena por pontos (maior para menor)
-    return allUsers.sort((a, b) => b.points - a.points);
+    return establishmentRanking;
   };
   
   // Usar pontos do contexto de usuário
@@ -326,11 +368,10 @@ export default function LojaScreen() {
           <View style={styles.storeInfoRow}>
             <View style={styles.ratingSection}>
               <Ionicons name="star" size={14} color="#FFD700" />
-              <Text style={styles.storeRating}>{(4.2 + Math.random() * 0.7).toFixed(1)}</Text>
+              <Text style={styles.storeRating}>5.0</Text>
             </View>
-            <Text style={styles.storePipe}>|</Text>
-            <Text style={styles.storeDescription}>{establishment?.description || establishment?.category || 'Carregando...'}</Text>
           </View>
+          <Text style={styles.storeDescription}>{establishment?.description || establishment?.category || 'Carregando...'}</Text>
         </View>
 
         <View style={styles.pointsSection}>
@@ -352,13 +393,13 @@ export default function LojaScreen() {
               style={[styles.separateTab, activeTab === 'destaque' && styles.activeSeparateTab]}
               onPress={() => setActiveTab('destaque')}
             >
-              <Text style={[styles.separateTabText, activeTab === 'destaque' && styles.activeSeparateTabText]}>Em Destaque</Text>
+              <Text style={[styles.separateTabText, activeTab === 'destaque' && styles.activeSeparateTabText]} numberOfLines={1} adjustsFontSizeToFit>Em Destaque</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.separateTab, activeTab === 'pontos' && styles.activeSeparateTab]}
               onPress={() => setActiveTab('pontos')}
             >
-              <Text style={[styles.separateTabText, activeTab === 'pontos' && styles.activeSeparateTabText]}>Cardápio de Pontos</Text>
+              <Text style={[styles.separateTabText, activeTab === 'pontos' && styles.activeSeparateTabText]} numberOfLines={1} adjustsFontSizeToFit>Cardápio de Pontos</Text>
             </TouchableOpacity>
           </View>
           
@@ -447,20 +488,20 @@ export default function LojaScreen() {
             
             <ScrollView style={styles.rankingList}>
               {getRanking().map((user, index) => (
-                <View key={index} style={styles.rankingItem}>
+                <View key={user.client?.id || index} style={styles.rankingItem}>
                   <View style={styles.rankingPosition}>
                     <Text style={styles.positionText}>{index + 1}º</Text>
                   </View>
-                  <View style={[styles.userAvatar, user.name === 'Eric Bauer' && styles.currentUserAvatar]}>
+                  <View style={styles.userAvatar}>
                     <Ionicons 
                       name="person" 
                       size={20} 
-                      color={user.name === 'Eric Bauer' ? '#E94057' : '#999'} 
+                      color="#999" 
                     />
                   </View>
                   <View style={styles.userInfo}>
-                    <Text style={[styles.userName, user.name === 'Eric Bauer' && styles.currentUserName]}>
-                      {user.name}
+                    <Text style={styles.userName}>
+                      {user.client?.name || user.name}
                     </Text>
                     <Text style={styles.userPoints}>{user.points} pontos</Text>
                   </View>
@@ -469,6 +510,13 @@ export default function LojaScreen() {
                   )}
                 </View>
               ))}
+              {getRanking().length === 0 && (
+                <View style={styles.emptyRanking}>
+                  <Ionicons name="people" size={48} color="#ccc" />
+                  <Text style={styles.emptyRankingText}>Nenhum usuário no ranking ainda</Text>
+                  <Text style={styles.emptySubtext}>Seja o primeiro a fazer pedidos!</Text>
+                </View>
+              )}
             </ScrollView>
             </View>
           </View>
@@ -595,6 +643,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
     color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
   },
   pointsSection: {
     paddingHorizontal: 20,
@@ -641,12 +691,14 @@ const styles = StyleSheet.create({
   separateTab: {
     flex: 1,
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 8,
     borderRadius: 25,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#f0f0f0',
     borderWidth: 1,
     borderColor: 'transparent',
+    minHeight: 44,
   },
   activeSeparateTab: {
     backgroundColor: '#fff',
@@ -658,9 +710,11 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   separateTabText: {
-    fontSize: 14,
+    fontSize: isLargeScreen ? 14 : 12,
     fontFamily: 'Poppins_600SemiBold',
     color: '#666',
+    textAlign: 'center',
+    numberOfLines: 1,
   },
   activeSeparateTabText: {
     color: PRIMARY_COLOR,
@@ -912,9 +966,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: 15,
   },
-  currentUserAvatar: {
-    backgroundColor: 'rgba(233, 64, 87, 0.1)',
-  },
+
   userInfo: {
     flex: 1,
   },
@@ -923,9 +975,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_600SemiBold',
     color: '#333',
   },
-  currentUserName: {
-    color: '#E94057',
-  },
+
   userPoints: {
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
@@ -960,5 +1010,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Poppins_600SemiBold',
     color: '#fff',
+  },
+  emptyRanking: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyRankingText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 12,
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 8,
   },
 });

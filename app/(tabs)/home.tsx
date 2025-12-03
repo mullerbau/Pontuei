@@ -35,8 +35,20 @@ const getRestaurantImage = (establishment: Establishment) => {
   return imageMap[establishment.name] || restaurantImages.diade;
 };
 
-const getRandomRating = () => (4.2 + Math.random() * 0.7).toFixed(1);
-const getRandomDistance = () => (0.3 + Math.random() * 1.2).toFixed(1) + ' km';
+const getStaticRating = (establishmentId: string) => {
+  return '5.0';
+};
+
+const getStaticDistance = (establishmentId: string) => {
+  const distances = {
+    'diade': '0.8 km',
+    'ampm': '1.2 km',
+    'differ': '0.5 km',
+    'versa': '0.9 km',
+    'cannabis': '1.1 km'
+  };
+  return distances[establishmentId] || '1.0 km';
+};
 
 const services = [
   { id: 1, name: 'Barbearias', description: 'Agende seu corte pelo App!', icon: 'cut' },
@@ -67,10 +79,10 @@ function EstablishmentCard({ establishment }: { establishment: Establishment }) 
       <View style={styles.establishmentInfo}>
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={10} color="#FFD700" />
-          <Text style={styles.ratingText}>{getRandomRating()}</Text>
+          <Text style={styles.ratingText}>{getStaticRating(establishment.id)}</Text>
         </View>
         <Text style={styles.pipelineText}>|</Text>
-        <Text style={styles.distanceText} numberOfLines={1}>{getRandomDistance()}</Text>
+        <Text style={styles.distanceText} numberOfLines={1}>{getStaticDistance(establishment.id)}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -107,9 +119,9 @@ function FeaturedCard({ establishment }: { establishment: Establishment }) {
         <View style={styles.featuredInfo}>
           <View style={styles.featuredRating}>
             <Ionicons name="star" size={12} color="#FFD700" />
-            <Text style={styles.featuredRatingText}>{getRandomRating()}</Text>
+            <Text style={styles.featuredRatingText}>{getStaticRating(establishment.id)}</Text>
           </View>
-          <Text style={styles.featuredDistance}>{getRandomDistance()}</Text>
+          <Text style={styles.featuredDistance}>{getStaticDistance(establishment.id)}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -413,8 +425,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   adBanner: {
-    width: isTablet ? width * 0.70 : '95vw',
-    height: isTablet ? 190 : 120,
+    width: isTablet ? width * 0.80 : width * 0.85,
+    height: isTablet ? 140 : 100,
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',

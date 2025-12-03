@@ -12,7 +12,7 @@ import { ApiService, Establishment, OrderItem } from '../services/api';
 export default function FinalizacaoPedido() {
   const { items, clearCart } = useCart();
   const { addOrder } = useOrders();
-  const { setLastStore } = useUser();
+  const { setLastStore, refreshUserPoints } = useUser();
   const [paymentMethod, setPaymentMethod] = useState('');
   const [deliveryMethod, setDeliveryMethod] = useState('retirada');
   const [storeName, setStoreName] = useState('Carregando...');
@@ -87,6 +87,9 @@ export default function FinalizacaoPedido() {
       if (storeId) {
         setLastStore(storeId);
       }
+
+      // Atualizar pontos do usuário
+      refreshUserPoints();
 
       // Não criar pedido localmente quando API funciona
 

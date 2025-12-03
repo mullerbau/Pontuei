@@ -170,6 +170,10 @@ export class ApiService {
     return this.request(`/clients/all-points/${clientId}`);
   }
 
+  static async getEstablishmentRanking(establishmentId: string) {
+    return this.request(`/clients/establishment-ranking/${establishmentId}`);
+  }
+
   // Testar conexão com a API
   static async testConnection(): Promise<boolean> {
     try {

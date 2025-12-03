@@ -10,12 +10,14 @@ interface UserContextType {
   getCurrentUserId: () => Promise<string | null>;
   getFavoriteStore: () => Promise<any>;
   getEstablishmentRanking: () => Promise<any[]>;
+  refreshUserPoints: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [lastVisitedStore, setLastVisitedStore] = useState<string | null>(null);
+  const [pointsRefreshTrigger, setPointsRefreshTrigger] = useState(0);
 
   const loadUserData = async () => {
     try {
@@ -102,6 +104,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshUserPoints = () => {
+    setPointsRefreshTrigger(prev => prev + 1);
+  };
+
   useEffect(() => {
     loadUserData();
   }, []);
@@ -114,7 +120,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       loadUserData,
       getCurrentUserId,
       getFavoriteStore,
-      getEstablishmentRanking
+      getEstablishmentRanking,
+      refreshUserPoints
     }}>
       {children}
     </UserContext.Provider>

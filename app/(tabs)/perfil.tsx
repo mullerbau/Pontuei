@@ -27,6 +27,7 @@ export default function TelaPerfil() {
   const [storePoints, setStorePoints] = useState(0);
   const [showRanking, setShowRanking] = useState(false);
   const [establishmentRanking, setEstablishmentRanking] = useState<any[]>([]);
+  const [showWallet, setShowWallet] = useState(false);
   
   // Carregar dados da loja favorita
   useEffect(() => {
@@ -89,14 +90,9 @@ export default function TelaPerfil() {
       </View>
 
         {/* Menu rápido */}
+        <Text style={s.sectionTitleRap}>Acesso rápido</Text>
         <View style={s.quickMenu}>
-        <TouchableOpacity style={s.quickMenuItem}>
-          <View style={s.quickIcon}>
-            <Ionicons name="gift" size={20} color="#ff3366" />
-          </View>
-          <Text style={s.quickText}>Cupons</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={s.quickMenuItem}>
+        <TouchableOpacity style={s.quickMenuItem} onPress={() => setShowWallet(true)}>
           <View style={s.quickIcon}>
             <Ionicons name="card" size={20} color="#ff3366" />
           </View>
@@ -183,6 +179,55 @@ export default function TelaPerfil() {
           </View>
         </View>
       )}
+
+      {/* Modal da Carteira */}
+      {showWallet && (
+        <View style={s.modalOverlay}>
+          <View style={s.rankingModal}>
+            <View style={s.rankingHeader}>
+              <Text style={s.rankingTitle}>Minha Carteira</Text>
+              <TouchableOpacity onPress={() => setShowWallet(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={s.rankingList}>
+              {establishmentRanking.map((item, index) => (
+                <TouchableOpacity 
+                  key={item.establishment.id} 
+                  style={s.walletItem}
+                  onPress={() => {
+                    setShowWallet(false);
+                    navegacao.push(`/loja/${item.establishment.id}`);
+                  }}
+                >
+                  <View style={s.establishmentAvatar}>
+                    <Image 
+                      source={item.establishment.logo_url ? { uri: item.establishment.logo_url } : require('../../assets/images/logo-restaurantes/diade.jpg')}
+                      style={s.avatarImage}
+                    />
+                  </View>
+                  <View style={s.establishmentInfo}>
+                    <Text style={s.establishmentName}>{item.establishment.name}</Text>
+                    <Text style={s.walletPoints}>{item.points} pontos disponíveis</Text>
+                  </View>
+                  <View style={s.pointsBadge}>
+                    <Ionicons name="sparkles" size={16} color="#ff3366" />
+                    <Text style={s.pointsBadgeText}>{item.points}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+              {establishmentRanking.length === 0 && (
+                <View style={s.emptyRanking}>
+                  <Ionicons name="wallet" size={48} color="#ccc" />
+                  <Text style={s.emptyRankingText}>Nenhum ponto na carteira ainda</Text>
+                  <Text style={s.emptySubtext}>Faça pedidos para ganhar pontos!</Text>
+                </View>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -214,7 +259,7 @@ const s = StyleSheet.create({
   storeInfo: { flex: 1 },
   storeName: { fontSize: 14, fontWeight: "500", color: "#333", marginBottom: 2 },
   storePoints: { fontSize: 12, color: "#ff3366", fontWeight: "500" },
-  
+  sectionTitleRap: { fontSize: 18, fontWeight: "600", color: "#333", textAlign: "center", marginTop: 24 },
   quickMenu: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -360,5 +405,37 @@ const s = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     textAlign: "center",
+  },
+  walletItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f5f5f5",
+  },
+  walletPoints: {
+    fontSize: 14,
+    color: "#ff3366",
+    fontWeight: "500",
+  },
+  pointsBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 51, 102, 0.1)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  pointsBadgeText: {
+    fontSize: 12,
+    color: "#ff3366",
+    fontWeight: "600",
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    marginTop: 8,
   },
 });
